@@ -95,6 +95,20 @@ body {
   0%,100% { transform: translateX(0); } 25% { transform: translateX(-2.5vmin); } 75% { transform: translateX(2.5vmin); }
 }
 
+/* the seal swims across the bottom on completion */
+.seal {
+  position: fixed; bottom: 3vh; left: 0; z-index: 40;
+  font-size: 16vmin; pointer-events: none; will-change: transform;
+  animation: swim 3.2s ease-in-out forwards;
+}
+@keyframes swim {           /* enter left → exit right, facing travel, gentle bob */
+  0%   { transform: translateX(-30vw) translateY(0)    scaleX(-1); }
+  25%  { transform: translateX(18vw)  translateY(-3vh) scaleX(-1); }
+  50%  { transform: translateX(50vw)  translateY(0)    scaleX(-1); }
+  75%  { transform: translateX(82vw)  translateY(-3vh) scaleX(-1); }
+  100% { transform: translateX(130vw) translateY(0)    scaleX(-1); }
+}
+
 /* finished name dances exactly 3 times, then comes to rest */
 .celebrate .filled { animation: dance .6s ease-in-out 3 both; }
 @keyframes dance {

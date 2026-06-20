@@ -62,6 +62,7 @@ function spawn() {
 /* ---------- correct key: slot the letter into its socket ---------- */
 function slot() {
   busy = true;
+  bark();                                         // 🦭 "ark!" on every correct letter
   const socket = socketsEl.children[idx];
   const glyph = active.querySelector('.glyph');
   glyph.style.animation = 'none';                 // stop jiggle so it settles
@@ -90,6 +91,8 @@ function slot() {
 function finish() {
   socketsEl.className = 'celebrate';
   bigExplosion();
+  tripleBark();                // "Ark ark ark!"
+  swimSeal();                  // 🦭 swims across the bottom
   setTimeout(reset, 4500);     // loop so she can do it again (no pressure, just play)
 }
 function reset() { idx = 0; buildSockets(); spawn(); }
@@ -103,6 +106,48 @@ addEventListener('keydown', (e) => {
     active.classList.remove('nope'); void active.offsetWidth; active.classList.add('nope');
   }
 });
+
+/* ---------- seal bark (Web Audio — synthesised, no sound files) ----------
+   A gruff downward honk ≈ "ark". First call resumes the context on the keypress
+   gesture, so audio is allowed. */
+let actx = null;
+function audio() {
+  if (!actx) actx = new (window.AudioContext || window.webkitAudioContext)();
+  if (actx.state === 'suspended') actx.resume();
+  return actx;
+}
+function bark(detune = 0) {
+  const ac = audio(), t = ac.currentTime;
+  // main gruff voice — pitch drops for the "a→rk" inflection
+  const o = ac.createOscillator(), g = ac.createGain();
+  o.type = 'sawtooth';
+  o.frequency.setValueAtTime(430 + detune, t);
+  o.frequency.exponentialRampToValueAtTime(150 + detune, t + 0.16);
+  g.gain.setValueAtTime(0.0001, t);
+  g.gain.exponentialRampToValueAtTime(0.5, t + 0.02);
+  g.gain.exponentialRampToValueAtTime(0.0001, t + 0.22);
+  // a rougher sub-layer for the bark texture
+  const o2 = ac.createOscillator(), g2 = ac.createGain();
+  o2.type = 'square';
+  o2.frequency.setValueAtTime(200 + detune, t);
+  o2.frequency.exponentialRampToValueAtTime(85 + detune, t + 0.16);
+  g2.gain.setValueAtTime(0.0001, t);
+  g2.gain.exponentialRampToValueAtTime(0.2, t + 0.02);
+  g2.gain.exponentialRampToValueAtTime(0.0001, t + 0.2);
+  o.connect(g).connect(ac.destination);
+  o2.connect(g2).connect(ac.destination);
+  o.start(t); o2.start(t); o.stop(t + 0.25); o2.stop(t + 0.25);
+}
+function tripleBark() { bark(0); setTimeout(() => bark(50), 200); setTimeout(() => bark(-40), 410); }
+
+/* ---------- the swimming seal ---------- */
+function swimSeal() {
+  const seal = document.createElement('div');
+  seal.className = 'seal';
+  seal.textContent = '🦭';
+  document.body.appendChild(seal);
+  setTimeout(() => seal.remove(), 3400);
+}
 
 /* ---------- confetti / colour explosion (canvas, no libraries) ---------- */
 const cv = document.getElementById('confetti'), cx = cv.getContext('2d');

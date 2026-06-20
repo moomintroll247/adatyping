@@ -62,7 +62,7 @@ function spawn() {
 /* ---------- correct key: slot the letter into its socket ---------- */
 function slot() {
   busy = true;
-  bark();                                         // 🦭 "ark!" on every correct letter
+  arkSound();                                      // 🦭 "ark!" on every correct letter (real file if present, else synth)
   const socket = socketsEl.children[idx];
   const glyph = active.querySelector('.glyph');
   glyph.style.animation = 'none';                 // stop jiggle so it settles
@@ -91,7 +91,7 @@ function slot() {
 function finish() {
   socketsEl.className = 'celebrate';
   bigExplosion();
-  tripleBark();                // "Ark ark ark!"
+  arkTriple();                 // "Ark ark ark!" (real file if present, else synth)
   swimSeal();                  // 🦭 swims across the bottom
   setTimeout(reset, 4500);     // loop so she can do it again (no pressure, just play)
 }
@@ -139,6 +139,28 @@ function bark(detune = 0) {
   o.start(t); o2.start(t); o.stop(t + 0.25); o2.stop(t + 0.25);
 }
 function tripleBark() { bark(0); setTimeout(() => bark(50), 200); setTimeout(() => bark(-40), 410); }
+
+/* If a real recording exists at assets/seal.(mp3|ogg|wav|m4a) it's used instead
+   of the synth — drop a CC0 bark (or your own "ark!") in and it just works. */
+let sealAudio = null, useRealSeal = false;
+(function loadSeal() {
+  const cands = ['assets/seal.mp3', 'assets/seal.ogg', 'assets/seal.wav', 'assets/seal.m4a'];
+  let i = 0;
+  (function tryNext() {
+    if (i >= cands.length) return;                 // none found → synth fallback
+    const a = new Audio(); a.preload = 'auto'; a.src = cands[i];
+    a.addEventListener('canplaythrough', () => { sealAudio = a; useRealSeal = true; }, { once: true });
+    a.addEventListener('error', () => { i++; tryNext(); }, { once: true });
+  })();
+})();
+function arkSound() {
+  if (useRealSeal && sealAudio) { const a = sealAudio.cloneNode(); a.play().catch(() => {}); }
+  else bark();
+}
+function arkTriple() {
+  if (useRealSeal && sealAudio) { [0, 200, 410].forEach(d => setTimeout(() => { const a = sealAudio.cloneNode(); a.play().catch(() => {}); }, d)); }
+  else tripleBark();
+}
 
 /* ---------- the swimming seal ---------- */
 function swimSeal() {

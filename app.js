@@ -1,200 +1,142 @@
-/* ============================================================================
-   The Typing Forest — engine.
-   Design rules (do not break):
-     • NO speed, NO timer, NO WPM. Completion + accuracy only.
-     • Wrong key = gentle nudge, never a penalty or red spam.
-     • Success = an explosion of colour.
-   ============================================================================ */
+/* Ada's Typing Forest — engine. TEXTLESS by design.
+   Rules: no words on screen ever; no speed/timer; wrong key = gentle wobble,
+   never a penalty; each letter is a jiggling creature that slots into place;
+   finishing = an explosion of colour. */
 
-const SAVE_KEY = 'typing-forest:v1';
+const stage   = document.getElementById('stage');
+const socketsEl = document.getElementById('sockets');
+const activeLayer = document.getElementById('active-layer');
 
-/* ---- progress (localStorage) ---- */
-function loadProgress() {
-  try { return JSON.parse(localStorage.getItem(SAVE_KEY)) || { done: [] }; }
-  catch { return { done: [] }; }
-}
-function saveProgress(p) { localStorage.setItem(SAVE_KEY, JSON.stringify(p)); }
+const LETTERS = LESSONS[CURRENT_LESSON].letters;   // e.g. ['a','d','a']
+let idx = 0;          // which letter we're on
+let active = null;    // the current jiggling element
+let busy = false;     // true while a letter is animating into its socket
 
-/* A station is unlocked if its own flag says so, OR the station before it is done. */
-function isUnlocked(i, progress) {
-  if (!STATIONS[i].locked) return true;
-  const prev = STATIONS[i - 1];
-  return prev && progress.done.includes(prev.id);
-}
+/* ---------- living background ---------- */
+(function bubbles() {
+  const bg = document.getElementById('bg');
+  for (let i = 0; i < 14; i++) {
+    const b = document.createElement('div');
+    b.className = 'bubble';
+    const size = 6 + Math.random() * 16;          // vmin
+    b.style.width = b.style.height = size + 'vmin';
+    b.style.left = Math.random() * 100 + 'vw';
+    b.style.setProperty('--drift', (Math.random() * 20 - 10) + 'vw');
+    b.style.animationDuration = (14 + Math.random() * 14) + 's';
+    b.style.animationDelay = (-Math.random() * 20) + 's';
+    bg.appendChild(b);
+  }
+})();
 
-/* ---- views ---- */
-const hub = document.getElementById('hub');
-const lesson = document.getElementById('lesson');
-function show(view) {
-  hub.classList.add('hidden'); lesson.classList.add('hidden');
-  view.classList.remove('hidden');
-}
-
-/* ---- HUB ---- */
-function renderHub() {
-  const progress = loadProgress();
-  const map = document.getElementById('map');
-  map.innerHTML = '';
-  STATIONS.forEach((st, i) => {
-    const unlocked = isUnlocked(i, progress);
-    const done = progress.done.includes(st.id);
-    const node = document.createElement('button');
-    node.className = 'node' + (unlocked ? ' open' : ' locked') + (done ? ' done' : '');
-    node.disabled = !unlocked;
-    node.innerHTML =
-      `<span class="node-icon">${unlocked ? st.icon : '🔒'}</span>` +
-      `<span class="node-title">${st.title}</span>` +
-      (done ? '<span class="tick">✓</span>' : '');
-    if (unlocked) node.onclick = () => startStation(i);
-    map.appendChild(node);
+/* ---------- build the empty sockets ---------- */
+function buildSockets() {
+  socketsEl.className = '';
+  socketsEl.innerHTML = '';
+  LETTERS.forEach(() => {
+    const s = document.createElement('div');
+    s.className = 'socket';
+    socketsEl.appendChild(s);
   });
-  show(hub);
 }
 
-/* ---- guide speech ---- */
-function setGuide(st, text) {
-  const sprite = document.getElementById('guideSprite');
-  const speech = document.getElementById('speech');
-  if (st.guide.sprite) { sprite.src = st.guide.sprite; sprite.style.display = 'block'; sprite.alt = st.guide.name; }
-  else { sprite.removeAttribute('src'); sprite.style.display = 'none'; }
-  // emoji fallback shown in the speech header
-  speech.innerHTML = `<span class="guide-emoji">${st.guide.emoji || ''}</span>${text}`;
+/* ---------- spawn the active jiggling letter ---------- */
+function spawn() {
+  const letter = LETTERS[idx];
+  active = document.createElement('div');
+  active.className = 'active';
+  active.innerHTML =
+    `<div class="glyph">${letter}` +
+    `<span class="eye eye-l"></span><span class="eye eye-r"></span></div>`;
+  activeLayer.appendChild(active);
+
+  // enter from alternating sides (a from left, d from right, a from left…)
+  const fromLeft = idx % 2 === 0;
+  active.style.transition = 'none';
+  active.style.transform = `translateX(${fromLeft ? -140 : 140}vw)`;
+  requestAnimationFrame(() => requestAnimationFrame(() => {
+    active.style.transition = '';
+    active.style.transform = '';   // glide to centre; jiggle (on .glyph) runs
+  }));
 }
 
-/* ---- start a station ---- */
-function startStation(i) {
-  const st = STATIONS[i];
-  document.getElementById('cheer').textContent = '';
-  if (st.placeholder) {
-    setGuide(st, `This place isn't built yet — you and Dad get to make it! What should be here?`);
-    document.getElementById('tiles').innerHTML = '';
-    show(lesson);
-    return;
-  }
-  runLesson(st, 0);
-  show(lesson);
+/* ---------- correct key: slot the letter into its socket ---------- */
+function slot() {
+  busy = true;
+  const socket = socketsEl.children[idx];
+  const glyph = active.querySelector('.glyph');
+  glyph.style.animation = 'none';                 // stop jiggle so it settles
+
+  const a = active.getBoundingClientRect();
+  const s = socket.getBoundingClientRect();
+  const dx = (s.left + s.width / 2) - (a.left + a.width / 2);
+  const dy = (s.top + s.height / 2) - (a.top + a.height / 2);
+  const scale = s.width / a.width;
+  active.style.transform = `translate(${dx}px, ${dy}px) scale(${scale})`;
+
+  const done = () => {
+    active.removeEventListener('transitionend', done);
+    active.remove(); active = null;
+    socket.innerHTML = `<span class="filled">${LETTERS[idx]}</span>`;
+    sparkle(s.left + s.width / 2, s.top + s.height / 2);   // little pop
+    idx++;
+    busy = false;
+    if (idx < LETTERS.length) spawn();
+    else finish();
+  };
+  active.addEventListener('transitionend', done);
 }
 
-/* ---- the typing lesson ---- */
-let active = null;   // { st, step, target, idx }
-
-function runLesson(st, stepIndex) {
-  const step = st.steps[stepIndex];
-  setGuide(st, step.prompt);
-  document.getElementById('cheer').textContent = '';
-  active = { st, stepIndex, target: step.target, idx: 0 };
-  renderTiles(step.display, step.target, 0);
+/* ---------- finished the whole name ---------- */
+function finish() {
+  socketsEl.className = 'celebrate';
+  bigExplosion();
+  setTimeout(reset, 4500);     // loop so she can do it again (no pressure, just play)
 }
+function reset() { idx = 0; buildSockets(); spawn(); }
 
-/* Draw the letter tiles. `display` is the pretty version, `target` what's typed.
-   We map display chars to target chars, skipping spaces in display. */
-function renderTiles(display, target, idx) {
-  const tiles = document.getElementById('tiles');
-  tiles.innerHTML = '';
-  let t = 0; // index into target
-  for (const ch of display) {
-    if (ch === ' ') { tiles.appendChild(spacer()); continue; }
-    const tile = document.createElement('div');
-    const state = t < idx ? 'hit' : (t === idx ? 'now' : 'todo');
-    tile.className = 'tile ' + state;
-    tile.textContent = ch;
-    tiles.appendChild(tile);
-    t++;
-  }
-}
-function spacer() { const s = document.createElement('div'); s.className = 'tile-gap'; return s; }
-
-/* keystrokes */
-document.addEventListener('keydown', (e) => {
-  if (!active || lesson.classList.contains('hidden')) return;
-  if (e.key.length !== 1) return;            // ignore Shift, arrows, etc. (no penalty)
-  const expected = active.target[active.idx];
-  if (e.key === expected) {
-    active.idx++;
-    const step = active.st.steps[active.stepIndex];
-    renderTiles(step.display, step.target, active.idx);
-    pop();
-    if (active.idx >= active.target.length) stepComplete();
+/* ---------- keys ---------- */
+addEventListener('keydown', (e) => {
+  if (busy || !active || e.key.length !== 1) return;
+  if (e.key.toLowerCase() === LETTERS[idx]) {
+    slot();
   } else {
-    nudge();                                  // gentle: shake the current tile, no penalty
+    active.classList.remove('nope'); void active.offsetWidth; active.classList.add('nope');
   }
 });
 
-function stepComplete() {
-  const { st, stepIndex } = active;
-  burst(0.6);                                 // little colour pop between steps
-  if (stepIndex + 1 < st.steps.length) {
-    document.getElementById('cheer').textContent = pickCheer();
-    setTimeout(() => runLesson(st, stepIndex + 1), 1100);
-  } else {
-    finishStation(st);
-  }
-}
-
-function finishStation(st) {
-  const p = loadProgress();
-  if (!p.done.includes(st.id)) { p.done.push(st.id); saveProgress(p); }
-  setGuide(st, st.reward);
-  document.getElementById('tiles').innerHTML = '';
-  document.getElementById('cheer').textContent = '⭐️ ⭐️ ⭐️';
-  bigExplosion();                             // THE explosion of colour
-  active = null;
-  setTimeout(renderHub, 4200);               // back to forest, new gate now open
-}
-
-/* ---- encouragement (never pressure) ---- */
-const CHEERS = ['Yes!', 'Brilliant!', 'You did it!', 'Amazing, Ada!', 'Wow!', 'Perfect!'];
-function pickCheer() { return CHEERS[Math.floor(Math.random() * CHEERS.length)]; }
-
-/* gentle wrong-key feedback */
-function nudge() {
-  const now = document.querySelector('.tile.now');
-  if (!now) return;
-  now.classList.remove('shake'); void now.offsetWidth; now.classList.add('shake');
-}
-/* correct-key pop */
-function pop() {
-  const hit = [...document.querySelectorAll('.tile.hit')].pop();
-  if (hit) { hit.classList.remove('pop'); void hit.offsetWidth; hit.classList.add('pop'); }
-}
-
-/* ---- confetti / colour explosion (canvas, no libraries) ---- */
-const cv = document.getElementById('confetti');
-const cx = cv.getContext('2d');
+/* ---------- confetti / colour explosion (canvas, no libraries) ---------- */
+const cv = document.getElementById('confetti'), cx = cv.getContext('2d');
 function fit() { cv.width = innerWidth; cv.height = innerHeight; }
 addEventListener('resize', fit); fit();
-let parts = [];
-const COLOURS = ['#ff4d6d','#ffd23f','#3bceac','#3a86ff','#b15dff','#ff924c','#06d6a0','#ef476f'];
-function spawn(n, power) {
-  for (let i = 0; i < n; i++) {
-    parts.push({
-      x: innerWidth / 2, y: innerHeight * 0.45,
-      vx: (Math.cos(i) + (i % 7) / 7 - 0.5) * 9 * power,
-      vy: (-Math.random() * 11 - 4) * power,
-      g: 0.32, r: 4 + Math.random() * 7,
-      c: COLOURS[i % COLOURS.length], life: 90 + Math.random() * 40, t: 0,
-      rot: Math.random() * 6, vr: (Math.random() - 0.5) * 0.4,
-    });
-  }
+let parts = [], raf = null;
+const COLOURS = ['#2dd4bf','#14b8a6','#5eead4','#ffd23f','#ff6b9d','#a78bfa','#ff924c','#fde68a'];
+function add(n, x, y, power) {
+  for (let i = 0; i < n; i++) parts.push({
+    x, y,
+    vx: (Math.random() - .5) * 18 * power,
+    vy: (-Math.random() * 13 - 4) * power,
+    g: .35, r: 5 + Math.random() * 8, rot: Math.random() * 6, vr: (Math.random() - .5) * .4,
+    c: COLOURS[(Math.random() * COLOURS.length) | 0], t: 0, life: 90 + Math.random() * 50,
+  });
   if (!raf) loop();
 }
-function burst(power = 1) { spawn(Math.round(70 * power), power); }
+function sparkle(x, y) { add(18, x, y, .6); }
 function bigExplosion() {
-  burst(1); setTimeout(() => burst(1.2), 250); setTimeout(() => burst(1.4), 550);
+  const cxp = innerWidth / 2, cyp = innerHeight * 0.4;
+  add(90, cxp, cyp, 1); setTimeout(() => add(90, cxp, cyp, 1.3), 250); setTimeout(() => add(110, cxp, cyp, 1.5), 550);
 }
-let raf = null;
 function loop() {
   cx.clearRect(0, 0, cv.width, cv.height);
   parts.forEach(p => {
     p.t++; p.vy += p.g; p.x += p.vx; p.y += p.vy; p.rot += p.vr;
     cx.save(); cx.translate(p.x, p.y); cx.rotate(p.rot);
-    cx.fillStyle = p.c; cx.globalAlpha = Math.max(0, 1 - p.t / p.life);
+    cx.globalAlpha = Math.max(0, 1 - p.t / p.life); cx.fillStyle = p.c;
     cx.fillRect(-p.r / 2, -p.r / 2, p.r, p.r * 0.6); cx.restore();
   });
-  parts = parts.filter(p => p.t < p.life && p.y < cv.height + 40);
+  parts = parts.filter(p => p.t < p.life && p.y < cv.height + 50);
   raf = parts.length ? requestAnimationFrame(loop) : null;
 }
 
-/* ---- wiring ---- */
-document.getElementById('backBtn').onclick = () => { active = null; renderHub(); };
-renderHub();
+/* ---------- go ---------- */
+buildSockets();
+spawn();

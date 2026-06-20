@@ -1,84 +1,96 @@
-/* The Typing Forest — playful, calm, no-pressure. en-GB. */
+/* Ada's Typing Forest — textless, teal, jiggle-and-slot.
+   No words anywhere: an 8-year-old who can't read navigates by shape,
+   motion and colour alone. Teal is her favourite colour → the hero. */
+
 :root {
-  --ink: #1f3d2b;
-  --leaf: #3bceac;
-  --leaf-deep: #2a9d8f;
-  --bark: #7a5230;
-  --sky: #e8f7ee;
-  --gold: #ffd23f;
+  --teal:        #14b8a6;
+  --teal-deep:   #0d9488;
+  --teal-bright: #2dd4bf;
+  --cream:       #fdfdfb;
+  --ink:         #0b3b38;
 }
-* { box-sizing: border-box; }
-html, body { margin: 0; height: 100%; }
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { height: 100%; overflow: hidden; }
 body {
-  font-family: "Comic Sans MS", "Chalkboard SE", "Baloo", system-ui, sans-serif;
-  background: radial-gradient(circle at 50% 0%, #f3fbf5, var(--sky));
-  color: var(--ink);
-  -webkit-text-size-adjust: 100%;
+  background: linear-gradient(160deg, #0f766e 0%, #14b8a6 55%, #5eead4 100%);
+  font-family: "Baloo 2", "Comic Sans MS", "Chalkboard SE", system-ui, sans-serif;
   user-select: none; -webkit-user-select: none;
-  overflow-x: hidden;
+  -webkit-text-size-adjust: 100%; touch-action: manipulation;
 }
-.hidden { display: none !important; }
+
+/* ---- living background: soft drifting bubbles (calm, not chaotic) ---- */
+#bg { position: fixed; inset: 0; overflow: hidden; z-index: 0; }
+.bubble {
+  position: absolute; bottom: -25vh; border-radius: 50%;
+  background: radial-gradient(circle at 35% 30%, rgba(255,255,255,.55), rgba(255,255,255,.06));
+  animation: rise linear infinite;
+}
+@keyframes rise {
+  0%   { transform: translateY(0) scale(1); opacity: 0; }
+  12%  { opacity: .75; } 88% { opacity: .75; }
+  100% { transform: translateY(-135vh) translateX(var(--drift,0)) scale(1.15); opacity: 0; }
+}
+
 #confetti { position: fixed; inset: 0; pointer-events: none; z-index: 50; }
 
-.view { min-height: 100%; padding: 24px 16px 60px; max-width: 900px; margin: 0 auto; }
-
-/* ---- hub ---- */
-.forest-title { text-align: center; font-size: clamp(28px, 7vw, 52px); margin: 10px 0 4px; }
-.forest-subtitle { text-align: center; font-size: clamp(16px, 3.5vw, 22px); color: var(--leaf-deep); margin: 0 0 24px; }
-#map { display: flex; flex-direction: column; gap: 22px; align-items: center; }
-
-.node {
-  display: flex; align-items: center; gap: 16px;
-  width: min(520px, 92vw); padding: 18px 22px;
-  border: none; border-radius: 26px; cursor: pointer;
-  font-family: inherit; text-align: left;
-  box-shadow: 0 6px 0 rgba(0,0,0,0.12); transition: transform .12s, box-shadow .12s;
-}
-.node.open {
-  background: linear-gradient(135deg, #b8f3df, #8ce6c8);
-  animation: glow 2.4s ease-in-out infinite;
-}
-.node.open:hover { transform: translateY(-3px); }
-.node.open:active { transform: translateY(3px); box-shadow: 0 2px 0 rgba(0,0,0,0.12); }
-.node.locked { background: #d9e4dc; color: #8aa394; cursor: default; box-shadow: 0 4px 0 rgba(0,0,0,0.07); }
-.node.done { outline: 4px solid var(--gold); }
-.node-icon { font-size: 40px; }
-.node-title { font-size: clamp(18px, 4.5vw, 26px); font-weight: 700; flex: 1; }
-.tick { font-size: 30px; color: var(--leaf-deep); }
-@keyframes glow {
-  0%,100% { box-shadow: 0 6px 0 rgba(0,0,0,0.12), 0 0 0 0 rgba(59,206,172,0.5); }
-  50%     { box-shadow: 0 6px 0 rgba(0,0,0,0.12), 0 0 26px 6px rgba(59,206,172,0.55); }
+/* ---- stage ---- */
+#stage {
+  position: relative; z-index: 10; height: 100%;
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 7vh;
 }
 
-/* ---- lesson ---- */
-.back {
-  background: none; border: none; font-family: inherit; font-size: 18px;
-  color: var(--leaf-deep); cursor: pointer; padding: 6px 2px; margin-bottom: 8px;
-}
-.guide { display: flex; align-items: flex-start; gap: 14px; margin: 8px 0 28px; }
-.guide-sprite { width: 96px; height: 96px; object-fit: contain; }
-.speech {
-  background: #fff; border-radius: 22px; padding: 16px 20px;
-  font-size: clamp(18px, 4vw, 24px); line-height: 1.35;
-  box-shadow: 0 4px 14px rgba(0,0,0,0.08); flex: 1;
-}
-.guide-emoji { font-size: 30px; margin-right: 8px; }
-
-.tiles { display: flex; flex-wrap: wrap; gap: 14px; justify-content: center; margin: 30px 0; }
-.tile {
-  width: clamp(58px, 16vw, 96px); height: clamp(58px, 16vw, 96px);
+/* the row of sockets the name assembles into */
+#sockets { display: flex; gap: 4vw; }
+.socket {
+  width: 18vmin; height: 18vmin; border-radius: 24px;
+  border: 6px dashed rgba(255,255,255,.45);
   display: flex; align-items: center; justify-content: center;
-  font-size: clamp(30px, 9vw, 56px); font-weight: 800; border-radius: 20px;
-  background: #fff; box-shadow: 0 5px 0 rgba(0,0,0,0.1);
 }
-.tile.todo { color: #c7d4cc; }
-.tile.now  { color: var(--ink); outline: 5px dashed var(--leaf); animation: bob 1.2s ease-in-out infinite; }
-.tile.hit  { color: #fff; background: linear-gradient(135deg, var(--leaf), var(--leaf-deep)); }
-.tile-gap  { width: 18px; }
-@keyframes bob { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-6px)} }
-.tile.pop  { animation: popper .35s ease; }
-@keyframes popper { 0%{transform:scale(1)} 40%{transform:scale(1.3)} 100%{transform:scale(1)} }
-.tile.shake { animation: shaker .3s; }
-@keyframes shaker { 0%,100%{transform:translateX(0)} 25%{transform:translateX(-7px)} 75%{transform:translateX(7px)} }
+.socket .filled {
+  font-size: 12vmin; font-weight: 800; color: var(--cream);
+  animation: settle .5s cubic-bezier(.2,1.4,.4,1);
+}
+@keyframes settle { 0%{transform:scale(1.6)} 60%{transform:scale(.88)} 100%{transform:scale(1)} }
 
-.cheer { text-align: center; font-size: clamp(26px, 7vw, 44px); color: var(--leaf-deep); min-height: 50px; font-weight: 800; }
+/* the active jiggling letter — a creature with eyes */
+#active-layer { position: relative; width: 100%; height: 28vmin; }
+.active {
+  position: absolute; width: 24vmin; height: 24vmin;
+  left: 50%; top: 50%; margin: -12vmin 0 0 -12vmin;
+  transform-origin: center center;
+  transition: transform .45s cubic-bezier(.5,0,.5,1), opacity .3s;
+}
+.glyph {
+  position: relative; width: 100%; height: 100%; border-radius: 28px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 16vmin; font-weight: 800; color: var(--teal-deep);
+  background: var(--cream);
+  box-shadow: 0 1.2vmin 0 rgba(0,0,0,.18), inset 0 0 0 .8vmin var(--teal-bright);
+  animation: jiggle .6s ease-in-out infinite;
+}
+@keyframes jiggle {
+  0%,100% { transform: rotate(-7deg) scale(1); }
+  25%     { transform: rotate(6deg)  scale(1.07); }
+  50%     { transform: rotate(-5deg) scale(1.0); }
+  75%     { transform: rotate(7deg)  scale(1.05); }
+}
+/* googly eyes */
+.eye {
+  position: absolute; top: 24%; width: 3.4vmin; height: 3.4vmin;
+  background: #fff; border-radius: 50%; box-shadow: inset 0 0 0 .4vmin #cfeae6; z-index: 2;
+}
+.eye::after {
+  content: ""; position: absolute; top: 40%; left: 40%;
+  width: 1.5vmin; height: 1.5vmin; background: var(--ink); border-radius: 50%;
+}
+.eye-l { left: 24%; } .eye-r { right: 24%; }
+
+/* gentle "not that one" wobble for a wrong key — no red, no penalty */
+.nope { animation: nope .35s; }
+@keyframes nope {
+  0%,100% { transform: translateX(0); } 25% { transform: translateX(-2.5vmin); } 75% { transform: translateX(2.5vmin); }
+}
+
+/* finished name does a happy bounce */
+.celebrate .filled { animation: dance .7s ease-in-out infinite; }
+@keyframes dance { 0%,100%{transform:translateY(0) rotate(-5deg)} 50%{transform:translateY(-3vmin) rotate(5deg)} }

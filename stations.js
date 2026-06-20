@@ -1,21 +1,19 @@
 /* ============================================================================
-   LESSONS — build-as-we-go, and NO READING REQUIRED.
+   THE NAME LESSON — three stages, NO READING REQUIRED.
 
-   A lesson is just a sequence of letters. Each letter becomes a jiggling
-   character that Ada presses; it slots into place; the next one arrives.
-   No text, no instructions — the moving letter IS the instruction.
+   Each stage is a sequence of letters that become jiggling characters Ada
+   presses; they slot into place; the next arrives. Capitals need the Shift key,
+   so when a stage contains capitals an on-screen Shift key appears and glows
+   when she holds the real Shift (her visual "you've got it" cue — no words).
 
-   To add a lesson later (home row, a new word, whatever she's into):
-     copy a block, give it an id and a `letters` array. That's it.
-
-   NB on capitals: caps need the Shift key, which is a separate thing to teach a
-   non-reader visually — deliberately left out of the first lesson so the
-   jiggle→slot→explode loop is dead simple. We add caps once she loves the basics.
+   Build-as-we-go: add more stages here, or more lessons later. That's it.
    ============================================================================ */
 
-const LESSONS = [
-  { id: 'name', letters: ['a', 'd', 'a'] },   // Ada's name, lower-case, one hand
-];
-
-// which lesson runs right now (MVP: the first one)
-const CURRENT_LESSON = 0;
+const LESSON = {
+  id: 'name',
+  stages: [
+    ['a', 'd', 'a'],   // 1. lower case, one hand
+    ['A', 'D', 'A'],   // 2. all capitals (learn Shift)
+    ['A', 'd', 'a'],   // 3. a real name: big A, little d, little a
+  ],
+};

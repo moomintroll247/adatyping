@@ -95,6 +95,26 @@ body {
   0%,100% { transform: translateX(0); } 25% { transform: translateX(-2.5vmin); } 75% { transform: translateX(2.5vmin); }
 }
 
+/* on-screen Shift key for capitals — glows teal when she holds the real Shift */
+#shiftkey {
+  position: fixed; left: 4vw; bottom: 5vh; z-index: 20;
+  width: 22vmin; height: 13vmin; border-radius: 18px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 8vmin; color: var(--cream);
+  background: rgba(255,255,255,.16);
+  border: .7vmin solid rgba(255,255,255,.55);
+  box-shadow: 0 1vmin 0 rgba(0,0,0,.18);
+  transition: transform .08s, background .12s, box-shadow .12s;
+}
+#shiftkey.hidden { display: none; }
+#shiftkey.pressed {
+  background: var(--teal-bright); color: var(--teal-deep);
+  transform: translateY(.7vmin);
+  box-shadow: 0 .3vmin 0 rgba(0,0,0,.18), 0 0 5vmin var(--teal-bright);
+}
+#shiftkey.hint { animation: shiftpulse .55s ease-in-out 3; }
+@keyframes shiftpulse { 0%,100%{ transform: scale(1); } 50%{ transform: scale(1.15); } }
+
 /* the seal swims across the bottom on completion */
 .seal {
   position: fixed; bottom: 3vh; left: 0; z-index: 40;

@@ -33,6 +33,15 @@ body {
 
 #confetti { position: fixed; inset: 0; pointer-events: none; z-index: 50; }
 
+/* textless "back to the forest" button */
+#toforest {
+  position: fixed; top: 2.5vh; left: 2.5vw; z-index: 60;
+  width: 13vmin; height: 13vmin; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 7vmin; text-decoration: none;
+  background: rgba(255,255,255,.2); border: .5vmin solid rgba(255,255,255,.5);
+}
+
 /* ---- stage ---- */
 #stage {
   position: relative; z-index: 10; height: 100%;

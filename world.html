@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Ada's Forest</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html, body { height: 100%; overflow: hidden; background: #0f766e; }
+    canvas { display: block; }
+    /* textless "tap to start" (needed to grab the mouse for looking around) */
+    #start {
+      position: fixed; inset: 0; z-index: 10; display: flex; align-items: center; justify-content: center;
+      background: radial-gradient(circle at 50% 40%, #14b8a6, #0f766e);
+      cursor: pointer;
+    }
+    #start .ring {
+      width: 28vmin; height: 28vmin; border-radius: 50%;
+      border: 1.4vmin solid rgba(255,255,255,.85);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 14vmin; animation: pulse 1.4s ease-in-out infinite;
+    }
+    @keyframes pulse { 0%,100%{ transform: scale(1); box-shadow: 0 0 0 0 rgba(255,255,255,.4); }
+                       50%{ transform: scale(1.08); box-shadow: 0 0 8vmin 2vmin rgba(255,255,255,.25); } }
+    /* crosshair dot */
+    #dot { position: fixed; left: 50%; top: 50%; width: 1.6vmin; height: 1.6vmin; margin: -.8vmin 0 0 -.8vmin;
+           border-radius: 50%; background: rgba(255,255,255,.7); z-index: 5; pointer-events: none; display: none; }
+  </style>
+</head>
+<body>
+  <div id="dot"></div>
+  <div id="start"><div class="ring">🌲</div></div>
+
+  <script type="importmap">
+  { "imports": {
+    "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
+    "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
+  }}
+  </script>
+  <script type="module">
+    import * as THREE from 'three';
+    import { PointerLockControls } from 'three/addons/controls/PointerLockControls.js';
+
+    const TEAL = 0x14b8a6, SKY = 0x5eead4;
+    const GLADE = new THREE.Vector3(0, 0, -18);   // where the open glade is
+
+    const renderer = new THREE.WebGLRenderer({ antialias: true });
+    renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+    renderer.setSize(innerWidth, innerHeight);
+    document.body.appendChild(renderer.domElement);
+
+    const scene = new THREE.Scene();
+    scene.background = new THREE.Color(SKY);
+    scene.fog = new THREE.Fog(SKY, 12, 70);
+
+    const camera = new THREE.PerspectiveCamera(72, innerWidth / innerHeight, 0.1, 200);
+    camera.position.set(0, 1.6, 10);
+    scene.add(camera);
+
+    scene.add(new THREE.HemisphereLight(0xddffff, 0x3a7a4a, 1.1));
+    const sun = new THREE.DirectionalLight(0xffffff, 0.8); sun.position.set(8, 20, 6); scene.add(sun);
+
+    // ground + a lighter path down the middle
+    scene.add(new THREE.Mesh(
+      new THREE.PlaneGeometry(400, 400),
+      new THREE.MeshStandardMaterial({ color: 0x2f9e6e })
+    )).rotation.x = -Math.PI / 2;
+    const path = new THREE.Mesh(new THREE.PlaneGeometry(5, 80), new THREE.MeshStandardMaterial({ color: 0x6fcf97 }));
+    path.rotation.x = -Math.PI / 2; path.position.set(0, 0.01, -20); scene.add(path);
+
+    // trees (simple: trunk + cone), kept off the central corridor
+    function tree(x, z) {
+      const g = new THREE.Group();
+      const trunk = new THREE.Mesh(new THREE.CylinderGeometry(0.3, 0.4, 2.2, 6), new THREE.MeshStandardMaterial({ color: 0x7a5230 }));
+      trunk.position.y = 1.1; g.add(trunk);
+      const leaves = new THREE.Mesh(new THREE.ConeGeometry(1.8, 4, 8), new THREE.MeshStandardMaterial({ color: 0x2e8b57 }));
+      leaves.position.y = 3.6; g.add(leaves);
+      g.position.set(x, 0, z); scene.add(g);
+    }
+    for (let i = 0; i < 90; i++) {
+      const x = (Math.random() * 2 - 1) * 80, z = -Math.random() * 90 + 15;
+      if (Math.abs(x) < 4) continue;                 // keep the path clear
+      tree(x, z);
+    }
+
+    // ---- the open glade: a glowing portal + the axolotl greeter ----
+    const portal = new THREE.Mesh(
+      new THREE.TorusGeometry(2.4, 0.35, 16, 40),
+      new THREE.MeshBasicMaterial({ color: 0x2dd4bf })
+    );
+    portal.position.set(GLADE.x, 2.4, GLADE.z); scene.add(portal);
+
+    const tex = new THREE.TextureLoader().load('assets/axolotl-face.jpeg');
+    tex.colorSpace = THREE.SRGBColorSpace;
+    const axo = new THREE.Mesh(new THREE.PlaneGeometry(2.6, 2.6),
+      new THREE.MeshBasicMaterial({ map: tex }));
+    axo.position.set(GLADE.x, 1.8, GLADE.z + 0.2); scene.add(axo);   // greeter, billboarded each frame
+
+    // ---- two locked gates further on (dim, not enterable yet) ----
+    function lockedGate(x, z) {
+      const m = new THREE.Mesh(new THREE.TorusGeometry(2.2, 0.3, 12, 32),
+        new THREE.MeshStandardMaterial({ color: 0x2a4a45 }));
+      m.position.set(x, 2.2, z); scene.add(m);
+    }
+    lockedGate(-16, -34); lockedGate(16, -34);
+
+    // ---- first-person controls ----
+    const controls = new PointerLockControls(camera, renderer.domElement);
+    const startEl = document.getElementById('start'), dot = document.getElementById('dot');
+    startEl.addEventListener('click', () => controls.lock());
+    controls.addEventListener('lock',   () => { startEl.style.display = 'none'; dot.style.display = 'block'; });
+    controls.addEventListener('unlock', () => { startEl.style.display = 'flex'; dot.style.display = 'none'; });
+
+    const keys = {};
+    addEventListener('keydown', e => keys[e.code] = true);
+    addEventListener('keyup',   e => keys[e.code] = false);
+
+    addEventListener('resize', () => {
+      camera.aspect = innerWidth / innerHeight; camera.updateProjectionMatrix();
+      renderer.setSize(innerWidth, innerHeight);
+    });
+
+    let entered = false;
+    const clock = new THREE.Clock();
+    function animate() {
+      requestAnimationFrame(animate);
+      const dt = Math.min(clock.getDelta(), 0.1);
+      if (controls.isLocked) {
+        const v = 7 * dt;
+        if (keys.KeyW || keys.ArrowUp)    controls.moveForward(v);
+        if (keys.KeyS || keys.ArrowDown)  controls.moveForward(-v);
+        if (keys.KeyA || keys.ArrowLeft)  controls.moveRight(-v);
+        if (keys.KeyD || keys.ArrowRight) controls.moveRight(v);
+        camera.position.x = Math.max(-90, Math.min(90, camera.position.x));
+        camera.position.z = Math.max(-95, Math.min(95, camera.position.z));
+        // walked into the glade → start the typing lesson
+        const d = Math.hypot(camera.position.x - GLADE.x, camera.position.z - GLADE.z);
+        if (!entered && d < 3.2) { entered = true; location.href = 'index.html'; }
+      }
+      axo.lookAt(camera.position.x, axo.position.y, camera.position.z);   // billboard
+      portal.scale.setScalar(1 + Math.sin(clock.elapsedTime * 2) * 0.04); // gentle pulse
+      portal.rotation.z += dt * 0.3;
+      renderer.render(scene, camera);
+    }
+    animate();
+  </script>
+</body>
+</html>

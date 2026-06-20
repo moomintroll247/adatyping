@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>The Typing Forest</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <!-- colour-explosion canvas (sits over everything) -->
+  <canvas id="confetti"></canvas>
+
+  <!-- ===== HUB: the forest walk-through ===== -->
+  <main id="hub" class="view">
+    <h1 class="forest-title">🌲 The Typing Forest 🌲</h1>
+    <p class="forest-subtitle">Tap a glowing place to go in.</p>
+    <div id="map"></div>
+  </main>
+
+  <!-- ===== LESSON view ===== -->
+  <section id="lesson" class="view hidden">
+    <button id="backBtn" class="back">← back to the forest</button>
+    <div class="guide">
+      <img id="guideSprite" class="guide-sprite" alt="">
+      <div id="speech" class="speech"></div>
+    </div>
+    <div id="tiles" class="tiles"></div>
+    <div id="cheer" class="cheer"></div>
+  </section>
+
+  <script src="stations.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>

@@ -153,13 +153,20 @@ let sealAudio = null, useRealSeal = false;
     a.addEventListener('error', () => { i++; tryNext(); }, { once: true });
   })();
 })();
+/* the full multi-bark clip plays once on completion (assets/seal_cheer.mp3) */
+let cheerAudio = null;
+(function loadCheer() {
+  const a = new Audio(); a.preload = 'auto'; a.src = 'assets/seal_cheer.mp3';
+  a.addEventListener('canplaythrough', () => { cheerAudio = a; }, { once: true });
+})();
 function arkSound() {
   if (useRealSeal && sealAudio) { const a = sealAudio.cloneNode(); a.play().catch(() => {}); }
   else bark();
 }
 function arkTriple() {
-  if (useRealSeal && sealAudio) { [0, 200, 410].forEach(d => setTimeout(() => { const a = sealAudio.cloneNode(); a.play().catch(() => {}); }, d)); }
-  else tripleBark();
+  if (cheerAudio) { const a = cheerAudio.cloneNode(); a.play().catch(() => {}); return; }   // full ark-ark-ark riot
+  if (useRealSeal && sealAudio) { [0, 200, 410].forEach(d => setTimeout(() => { const a = sealAudio.cloneNode(); a.play().catch(() => {}); }, d)); return; }
+  tripleBark();
 }
 
 /* ---------- the swimming seal ---------- */

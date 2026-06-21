@@ -31,7 +31,7 @@
 </head>
 <body>
   <div id="dot"></div>
-  <div id="ver">forest v10</div>
+  <div id="ver">forest v11</div>
   <div id="start"><div class="ring">🌲</div></div>
 
   <script type="importmap">
@@ -133,7 +133,7 @@
         }
         gill.position.set(.82 * s, .4, .5);                 // emerge from the side of the head
         gill.rotation.x = -0.3;                              // slight back-sweep
-        gill.rotation.z = s * (0.9 + i * 0.35);             // point OUT to the side, fanned up-and-out
+        gill.rotation.z = -s * (0.9 + i * 0.35);            // point OUT to the side (−s = outward), fanned up
         g.add(gill);
       }
       // paddle tail

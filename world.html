@@ -95,11 +95,11 @@
     );
     portal.position.set(GLADE.x, 3, GLADE.z); scene.add(portal);
 
-    const tex = new THREE.TextureLoader().load('assets/axolotl-face.jpeg');
+    const tex = new THREE.TextureLoader().load('assets/axolotl-big.png');   // cut-out floating axolotl
     tex.colorSpace = THREE.SRGBColorSpace;
-    const axo = new THREE.Mesh(new THREE.PlaneGeometry(3.4, 3.4),
-      new THREE.MeshBasicMaterial({ map: tex, side: THREE.DoubleSide, transparent: true }));
-    axo.position.set(GLADE.x, 1.9, GLADE.z + 0.2); scene.add(axo);   // greeter, billboarded each frame
+    const axo = new THREE.Mesh(new THREE.PlaneGeometry(3.0, 3.0 * 320 / 215),  // match cut-out aspect
+      new THREE.MeshBasicMaterial({ map: tex, side: THREE.DoubleSide, transparent: true, alphaTest: 0.5 }));
+    axo.position.set(GLADE.x, 2.2, GLADE.z + 0.2); scene.add(axo);   // greeter, billboarded each frame
 
     // ---- two locked gates further on (dim, not enterable yet) ----
     function lockedGate(x, z) {

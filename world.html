@@ -62,10 +62,12 @@
     const sun = new THREE.DirectionalLight(0xffffff, 0.8); sun.position.set(8, 20, 6); scene.add(sun);
 
     // ground + a lighter path down the middle
-    scene.add(new THREE.Mesh(
+    const ground = new THREE.Mesh(
       new THREE.PlaneGeometry(400, 400),
       new THREE.MeshStandardMaterial({ color: 0x2f9e6e })
-    )).rotation.x = -Math.PI / 2;
+    );
+    ground.rotation.x = -Math.PI / 2;   // lay it FLAT (mustn't chain off scene.add — that returns the scene)
+    scene.add(ground);
     const path = new THREE.Mesh(new THREE.PlaneGeometry(5, 80), new THREE.MeshStandardMaterial({ color: 0x6fcf97 }));
     path.rotation.x = -Math.PI / 2; path.position.set(0, 0.01, -20); scene.add(path);
 

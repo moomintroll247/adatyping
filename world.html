@@ -97,9 +97,9 @@
 
     const tex = new THREE.TextureLoader().load('assets/axolotl-big.png');   // cut-out floating axolotl
     tex.colorSpace = THREE.SRGBColorSpace;
-    const axo = new THREE.Mesh(new THREE.PlaneGeometry(3.0, 3.0 * 320 / 215),  // match cut-out aspect
-      new THREE.MeshBasicMaterial({ map: tex, side: THREE.DoubleSide, transparent: true, alphaTest: 0.5 }));
-    axo.position.set(GLADE.x, 2.2, GLADE.z + 0.2); scene.add(axo);   // greeter, billboarded each frame
+    const axo = new THREE.Mesh(new THREE.PlaneGeometry(4.0, 4.0 * 433 / 1100),  // match cut-out aspect (landscape)
+      new THREE.MeshBasicMaterial({ map: tex, side: THREE.DoubleSide, transparent: true, alphaTest: 0.4 }));
+    axo.position.set(GLADE.x, 2.6, GLADE.z + 0.2); scene.add(axo);   // greeter, billboarded each frame
 
     // ---- two locked gates further on (dim, not enterable yet) ----
     function lockedGate(x, z) {

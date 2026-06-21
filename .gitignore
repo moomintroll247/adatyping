@@ -1,0 +1,7 @@
+# Source photos + screen recordings — not needed in the repo (cutouts live in assets/)
+IMG_*.jpeg
+IMG_*.jpg
+IMG_*.heic
+*.mov
+*.mp4
+.DS_Store

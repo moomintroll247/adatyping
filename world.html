@@ -31,7 +31,7 @@
 </head>
 <body>
   <div id="dot"></div>
-  <div id="ver">forest v9</div>
+  <div id="ver">forest v10</div>
   <div id="start"><div class="ring">🌲</div></div>
 
   <script type="importmap">
@@ -121,19 +121,19 @@
       // smile
       const smile = new THREE.Mesh(new THREE.TorusGeometry(.18, .03, 8, 16, Math.PI), dark);
       smile.rotation.z = Math.PI; smile.position.set(0, .1, 1.62); g.add(smile);
-      // 3 big feathery external gills per side (the axolotl hallmark) — fan up & out from behind the head
+      // 3 big feathery external gills per side — sprout from the SIDES and stick OUT (the hallmark)
       for (const s of [-1, 1]) for (let i = 0; i < 3; i++) {
         const gill = new THREE.Group();
-        const stalk = new THREE.Mesh(new THREE.CylinderGeometry(.045, .11, .95, 6), purple);
-        stalk.position.y = .47; gill.add(stalk);
+        const stalk = new THREE.Mesh(new THREE.CylinderGeometry(.05, .12, 1.05, 6), purple);
+        stalk.position.y = .52; gill.add(stalk);
         for (let j = 0; j < 5; j++) {                       // feathery blobs staggered up the stalk
-          const blob = new THREE.Mesh(new THREE.SphereGeometry(.2 - j * .025, 10, 8), purple);
-          blob.position.set((j % 2 ? 1 : -1) * .12, .2 + j * .17, 0);
+          const blob = new THREE.Mesh(new THREE.SphereGeometry(.23 - j * .025, 10, 8), purple);
+          blob.position.set((j % 2 ? 1 : -1) * .13, .22 + j * .19, 0);
           gill.add(blob);
         }
-        gill.position.set(.5 * s, .55, .5);
-        gill.rotation.z = (.3 + i * .4) * s;                // fan outward
-        gill.rotation.x = -.55 + i * .12;                   // lean back, varied per branch
+        gill.position.set(.82 * s, .4, .5);                 // emerge from the side of the head
+        gill.rotation.x = -0.3;                              // slight back-sweep
+        gill.rotation.z = s * (0.9 + i * 0.35);             // point OUT to the side, fanned up-and-out
         g.add(gill);
       }
       // paddle tail

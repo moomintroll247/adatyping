@@ -42,7 +42,7 @@
     import { PointerLockControls } from 'three/addons/controls/PointerLockControls.js';
 
     const TEAL = 0x14b8a6, SKY = 0x5eead4;
-    const GLADE = new THREE.Vector3(0, 0, -18);   // where the open glade is
+    const GLADE = new THREE.Vector3(0, 0, -14);   // where the open glade is (closer = visible from spawn)
 
     const renderer = new THREE.WebGLRenderer({ antialias: true });
     renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
@@ -54,7 +54,8 @@
     scene.fog = new THREE.Fog(SKY, 12, 70);
 
     const camera = new THREE.PerspectiveCamera(72, innerWidth / innerHeight, 0.1, 200);
-    camera.position.set(0, 1.6, 10);
+    camera.position.set(0, 1.6, 8);
+    camera.lookAt(GLADE.x, 1.6, GLADE.z);          // start facing the glade
     scene.add(camera);
 
     scene.add(new THREE.HemisphereLight(0xddffff, 0x3a7a4a, 1.1));
@@ -87,16 +88,22 @@
 
     // ---- the open glade: a glowing portal + the axolotl greeter ----
     const portal = new THREE.Mesh(
-      new THREE.TorusGeometry(2.4, 0.35, 16, 40),
-      new THREE.MeshBasicMaterial({ color: 0x2dd4bf })
+      new THREE.TorusGeometry(3.2, 0.5, 16, 48),
+      new THREE.MeshBasicMaterial({ color: 0xff6b9d })     // pink — pops against teal, matches the axolotl
     );
-    portal.position.set(GLADE.x, 2.4, GLADE.z); scene.add(portal);
+    portal.position.set(GLADE.x, 3, GLADE.z); scene.add(portal);
+    // soft beacon pillar so the glade is obvious from far off
+    const beam = new THREE.Mesh(
+      new THREE.CylinderGeometry(0.7, 0.7, 50, 12),
+      new THREE.MeshBasicMaterial({ color: 0xff9ecb, transparent: true, opacity: 0.22 })
+    );
+    beam.position.set(GLADE.x, 24, GLADE.z); scene.add(beam);
 
     const tex = new THREE.TextureLoader().load('assets/axolotl-face.jpeg');
     tex.colorSpace = THREE.SRGBColorSpace;
-    const axo = new THREE.Mesh(new THREE.PlaneGeometry(2.6, 2.6),
+    const axo = new THREE.Mesh(new THREE.PlaneGeometry(3.4, 3.4),
       new THREE.MeshBasicMaterial({ map: tex, side: THREE.DoubleSide, transparent: true }));
-    axo.position.set(GLADE.x, 1.8, GLADE.z + 0.2); scene.add(axo);   // greeter, billboarded each frame
+    axo.position.set(GLADE.x, 1.9, GLADE.z + 0.2); scene.add(axo);   // greeter, billboarded each frame
 
     // ---- two locked gates further on (dim, not enterable yet) ----
     function lockedGate(x, z) {

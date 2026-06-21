@@ -25,10 +25,13 @@
     /* crosshair dot */
     #dot { position: fixed; left: 50%; top: 50%; width: 1.6vmin; height: 1.6vmin; margin: -.8vmin 0 0 -.8vmin;
            border-radius: 50%; background: rgba(255,255,255,.7); z-index: 5; pointer-events: none; display: none; }
+    #ver { position: fixed; right: 8px; bottom: 6px; z-index: 100; font: 13px/1 ui-monospace, monospace;
+           color: rgba(255,255,255,.6); pointer-events: none; }
   </style>
 </head>
 <body>
   <div id="dot"></div>
+  <div id="ver">forest v6</div>
   <div id="start"><div class="ring">🌲</div></div>
 
   <script type="importmap">

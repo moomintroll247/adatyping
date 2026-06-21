@@ -32,6 +32,7 @@ body {
 }
 
 #confetti { position: fixed; inset: 0; pointer-events: none; z-index: 50; }
+#ver { position: fixed; right: 8px; bottom: 6px; z-index: 100; font: 13px/1 ui-monospace, monospace; color: rgba(255,255,255,.6); pointer-events: none; }
 
 /* textless "back to the forest" button */
 #toforest {

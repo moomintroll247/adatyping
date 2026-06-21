@@ -94,12 +94,6 @@
       new THREE.MeshBasicMaterial({ color: 0xff6b9d })     // pink — pops against teal, matches the axolotl
     );
     portal.position.set(GLADE.x, 3, GLADE.z); scene.add(portal);
-    // soft beacon pillar so the glade is obvious from far off
-    const beam = new THREE.Mesh(
-      new THREE.CylinderGeometry(0.7, 0.7, 50, 12),
-      new THREE.MeshBasicMaterial({ color: 0xff9ecb, transparent: true, opacity: 0.22 })
-    );
-    beam.position.set(GLADE.x, 24, GLADE.z); scene.add(beam);
 
     const tex = new THREE.TextureLoader().load('assets/axolotl-face.jpeg');
     tex.colorSpace = THREE.SRGBColorSpace;

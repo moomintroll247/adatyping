@@ -31,7 +31,7 @@
 </head>
 <body>
   <div id="dot"></div>
-  <div id="ver">forest v6</div>
+  <div id="ver">forest v7</div>
   <div id="start"><div class="ring">🌲</div></div>
 
   <script type="importmap">
@@ -98,11 +98,11 @@
     );
     portal.position.set(GLADE.x, 3, GLADE.z); scene.add(portal);
 
-    const tex = new THREE.TextureLoader().load('assets/axolotl-big.png?v=3');   // ?v= busts the browser cache
+    const tex = new THREE.TextureLoader().load('assets/axolotl-face.png?v=7');   // clean transparent cutout
     tex.colorSpace = THREE.SRGBColorSpace;
-    const axo = new THREE.Mesh(new THREE.PlaneGeometry(4.0, 4.0 * 433 / 1100),  // match cut-out aspect (landscape)
+    const axo = new THREE.Mesh(new THREE.PlaneGeometry(3.4, 3.4 * 911 / 1100),   // match cut-out aspect
       new THREE.MeshBasicMaterial({ map: tex, side: THREE.DoubleSide, transparent: true, depthWrite: false }));
-    axo.position.set(GLADE.x, 2.6, GLADE.z + 0.2); scene.add(axo);   // greeter, billboarded each frame
+    axo.position.set(GLADE.x, 2.7, GLADE.z + 0.2); scene.add(axo);   // greeter, billboarded each frame
 
     // ---- two locked gates further on (dim, not enterable yet) ----
     function lockedGate(x, z) {

@@ -61,7 +61,7 @@
     <div id="pips"></div>
     <div id="key"></div>
   </main>
-  <div id="ver">j k v2</div>
+  <div id="ver">j k v3</div>
 
   <script>
     const STAGES = [ { letter:'j', finger:'f-index' }, { letter:'k', finger:'f-middle' } ];
@@ -134,6 +134,7 @@
         x:cxp+(Math.random()-.5)*100, y:cyp+(Math.random()-.5)*60,
         vx:(Math.random()-.5)*20, vy:-Math.random()*12-3,
         r:16+Math.random()*16, c:COLS[(Math.random()*COLS.length)|0], squash:1 });
+      if(squishes.length>80) squishes.splice(0, squishes.length-80);   // cap so the pile can't grow forever
       if(!raf) loop();
     }
     function loop(){

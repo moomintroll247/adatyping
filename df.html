@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>d &amp; f</title>
+  <style>
+    :root { --teal:#14b8a6; --teal-deep:#0d9488; --teal-bright:#2dd4bf; --cream:#fdfdfb; --gold:#ffd23f; }
+    * { box-sizing:border-box; margin:0; padding:0; }
+    html,body { height:100%; overflow:hidden; }
+    body { background:linear-gradient(160deg,#0f766e,#14b8a6 55%,#5eead4);
+           font-family:"Baloo 2","Comic Sans MS",system-ui,sans-serif; user-select:none; -webkit-user-select:none; touch-action:manipulation; }
+    #bg { position:fixed; inset:0; overflow:hidden; z-index:0; }
+    .bubble { position:absolute; bottom:-25vh; border-radius:50%;
+      background:radial-gradient(circle at 35% 30%,rgba(255,255,255,.5),rgba(255,255,255,.05)); animation:rise linear infinite; }
+    @keyframes rise { 0%{transform:translateY(0);opacity:0} 12%{opacity:.7} 88%{opacity:.7} 100%{transform:translateY(-135vh) translateX(var(--drift,0));opacity:0} }
+    #squish { position:fixed; inset:0; z-index:40; pointer-events:none; }
+    #toforest { position:fixed; top:2.5vh; left:2.5vw; z-index:60; width:13vmin; height:13vmin; border-radius:50%;
+      display:flex; align-items:center; justify-content:center; font-size:7vmin; text-decoration:none;
+      background:rgba(255,255,255,.2); border:.5vmin solid rgba(255,255,255,.5); }
+    #ver { position:fixed; right:8px; bottom:6px; z-index:100; font:13px/1 ui-monospace,monospace; color:rgba(255,255,255,.6); }
+    #stage { position:relative; z-index:10; height:100%; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:4vh; }
+    #key { width:24vmin; height:24vmin; border-radius:26px; background:var(--cream);
+      display:flex; align-items:center; justify-content:center; font-size:15vmin; font-weight:800; color:var(--teal-deep);
+      box-shadow:0 1.2vmin 0 rgba(0,0,0,.18), inset 0 0 0 .8vmin var(--teal-bright); }
+    #key.nope { animation:nope .35s; }
+    @keyframes nope { 0%,100%{transform:translateX(0)} 25%{transform:translateX(-2vmin)} 75%{transform:translateX(2vmin)} }
+    #pips { display:flex; gap:2.5vmin; }
+    .pip { width:7vmin; height:7vmin; border-radius:50%; background:rgba(255,255,255,.18); border:.5vmin solid rgba(255,255,255,.5); }
+    .pip.on { animation:pop .35s cubic-bezier(.2,1.5,.4,1) forwards; }
+    @keyframes pop { 0%{transform:scale(.4)} 100%{transform:scale(1)} }
+    #hand { position:relative; width:42vmin; height:38vmin; transform:scaleX(-1); }  /* LEFT hand (mirror) */
+    .palm { position:absolute; bottom:0; left:50%; transform:translateX(-50%); width:28vmin; height:15vmin;
+      background:#f6c79a; border-radius:5vmin 5vmin 4vmin 4vmin; }
+    .finger { position:absolute; bottom:12vmin; width:4.6vmin; background:#f6c79a; border-radius:2.3vmin 2.3vmin 1.2vmin 1.2vmin; transition:transform .1s; }
+    .thumb { bottom:4vmin; left:6vmin; width:4.8vmin; height:11vmin; transform:rotate(-50deg); transform-origin:bottom center; background:#f0bd8f; }
+    .f-index  { left:9vmin;  height:19vmin; }
+    .f-middle { left:15vmin; height:23vmin; }
+    .f-ring   { left:21vmin; height:19vmin; }
+    .f-pinky  { left:27vmin; height:14vmin; width:4vmin; }
+    .finger.active { background:var(--gold); box-shadow:0 0 5vmin 1vmin rgba(255,210,63,.7); animation:wig 1.4s ease-in-out infinite; }
+    @keyframes wig { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-1vmin)} }
+    .finger.tap { transform:translateY(2.5vmin) scaleY(.9); }
+    .spark { position:absolute; font-size:5vmin; pointer-events:none; animation:tw 1s ease-in-out infinite; }
+    @keyframes tw { 0%,100%{opacity:.2; transform:scale(.7) rotate(0)} 50%{opacity:1; transform:scale(1.2) rotate(20deg)} }
+  </style>
+</head>
+<body>
+  <div id="bg"></div>
+  <a id="toforest" href="world.html" aria-label="forest">🌲</a>
+  <canvas id="squish"></canvas>
+  <main id="stage">
+    <div id="hand">
+      <div class="palm"></div>
+      <div class="finger thumb"></div>
+      <div class="finger f-index"></div>
+      <div class="finger f-middle"></div>
+      <div class="finger f-ring"></div>
+      <div class="finger f-pinky"></div>
+    </div>
+    <div id="pips"></div>
+    <div id="key"></div>
+  </main>
+  <div id="ver">d f v1</div>
+
+  <script>
+    const FINGER = { f:'f-index', d:'f-middle' };   // left hand: index=f, middle=d
+    function randomSeq(n){ let s=''; for(let i=0;i<n;i++) s+=Math.random()<0.5?'f':'d'; return s; }
+    const STAGES = ['ffffffff', 'dddddddd', 'fdfdfdfd', 'ffddffddffddffdd', randomSeq(16)];
+    let stage = 0, idx = 0, busy = false;
+    const keyEl = document.getElementById('key'), pipsEl = document.getElementById('pips'), handEl = document.getElementById('hand');
+
+    (function(){ const bg=document.getElementById('bg');
+      for(let i=0;i<12;i++){ const b=document.createElement('div'); b.className='bubble';
+        const s=6+Math.random()*16; b.style.width=b.style.height=s+'vmin'; b.style.left=Math.random()*100+'vw';
+        b.style.setProperty('--drift',(Math.random()*20-10)+'vw'); b.style.animationDuration=(14+Math.random()*14)+'s';
+        b.style.animationDelay=(-Math.random()*20)+'s'; bg.appendChild(b);} })();
+
+    function renderStage(){
+      const seq = STAGES[stage];
+      pipsEl.innerHTML = '';
+      const sz = Math.min(7, 46 / seq.length);
+      pipsEl.style.gap = Math.min(2.4, 16 / seq.length) + 'vmin';
+      for(let i=0;i<seq.length;i++){ const p=document.createElement('div'); p.className='pip';
+        p.style.width=p.style.height=sz+'vmin'; pipsEl.appendChild(p); }
+      idx = 0; showCurrent();
+    }
+    function showCurrent(){
+      const ch = STAGES[stage][idx];
+      keyEl.textContent = ch; keyEl.className = '';
+      document.querySelectorAll('.finger').forEach(f=>f.classList.remove('active'));
+      document.querySelectorAll('.spark').forEach(s=>s.remove());
+      const fin = handEl.querySelector('.'+FINGER[ch]); fin.classList.add('active');   // glowing finger switches per letter
+      for(let i=0;i<3;i++){ const sp=document.createElement('div'); sp.className='spark'; sp.textContent='✨';
+        sp.style.left=(fin.offsetLeft/handEl.offsetWidth*100 + (i-1)*4)+'%';
+        sp.style.bottom=(60+i*10)+'%'; sp.style.animationDelay=(i*0.3)+'s'; handEl.appendChild(sp); }
+    }
+    function press(){
+      const seq = STAGES[stage];
+      const fin = handEl.querySelector('.'+FINGER[seq[idx]]);
+      fin.classList.add('tap'); setTimeout(()=>fin.classList.remove('tap'),120);
+      const last = idx === seq.length - 1;
+      if(last && seq.length >= 16) finale(); else tone(idx);          // long runs end on a glissando-chord
+      const p = pipsEl.children[idx]; p.classList.add('on');
+      p.style.background = COLS[idx % COLS.length]; p.style.borderColor = 'rgba(255,255,255,.8)';
+      idx++;
+      if(idx >= seq.length){ busy = true; if(seq.length < 16) chord(); squishBurst(); setTimeout(next, 1600); }
+      else showCurrent();
+    }
+    function next(){ stage = (stage + 1) % STAGES.length; renderStage(); busy = false; }
+
+    addEventListener('keydown',(e)=>{
+      if(busy || e.key.length!==1) return;
+      if(e.key.toLowerCase()===STAGES[stage][idx]) press();
+      else { keyEl.classList.remove('nope'); void keyEl.offsetWidth; keyEl.classList.add('nope'); }
+    });
+
+    let actx=null;
+    function ac(){ if(!actx) actx=new (window.AudioContext||window.webkitAudioContext)(); if(actx.state==='suspended') actx.resume(); return actx; }
+    function tone(n){
+      const c=ac(), t=c.currentTime;
+      const scale=[1, 9/8, 5/4, 4/3, 3/2, 5/3, 15/8, 2];               // major scale; index 7 = the octave
+      const freq = 262 * Math.pow(2, Math.floor(n/8)) * scale[n%8];    // climbs; every 8th note lands on an octave
+      const o=c.createOscillator(), g=c.createGain();
+      o.type='triangle'; o.frequency.value=freq;
+      g.gain.setValueAtTime(.0001,t); g.gain.exponentialRampToValueAtTime(.4,t+.02); g.gain.exponentialRampToValueAtTime(.0001,t+.4);
+      o.connect(g).connect(c.destination); o.start(t); o.stop(t+.45);
+    }
+    function chord(){
+      const c=ac(), t=c.currentTime;
+      [659,784,988].forEach((f,k)=>{ const o=c.createOscillator(),g=c.createGain(); o.type='triangle'; o.frequency.value=f;
+        g.gain.setValueAtTime(.0001,t+k*.04); g.gain.exponentialRampToValueAtTime(.3,t+.05+k*.04); g.gain.exponentialRampToValueAtTime(.0001,t+.7);
+        o.connect(g).connect(c.destination); o.start(t+k*.04); o.stop(t+.75); });
+    }
+    function finale(){          // big struck C-major chord — triumphant "end of the performance" ring
+      const c=ac(), t=c.currentTime;
+      const notes=[131,262,330,392,523,659,784,1047];   // C3 C4 E4 G4 C5 E5 G5 C6 — spread across octaves
+      notes.forEach((f,k)=>{
+        const o=c.createOscillator(), g=c.createGain(); o.type='triangle'; o.frequency.value=f;
+        const st=t+k*0.012;                              // tiny roll, like a struck chord
+        g.gain.setValueAtTime(.0001,st); g.gain.exponentialRampToValueAtTime(.16,st+.02);
+        g.gain.exponentialRampToValueAtTime(.0001,st+1.5);   // long triumphant ring
+        o.connect(g).connect(c.destination); o.start(st); o.stop(st+1.6);
+      });
+    }
+
+    const cv=document.getElementById('squish'), cx=cv.getContext('2d');
+    function fit(){ cv.width=innerWidth; cv.height=innerHeight; }
+    addEventListener('resize',fit); fit();
+    const COLS=['#ff8fc0','#2dd4bf','#a78bfa','#ffd23f','#ff924c','#5eead4','#ff6b9d'];
+    let squishes=[], raf=null;
+    const G=0.75, REST=0.5;                       // gravity + bounciness (solid but springy)
+    function squishBurst(){
+      const cxp=innerWidth/2, cyp=innerHeight*0.45;
+      const FKINDS=['spinner','popit','cube','ball','noodle'];
+      for(let i=0;i<30;i++){
+        const kind=FKINDS[(Math.random()*FKINDS.length)|0];
+        squishes.push({
+          x:cxp+(Math.random()-.5)*100, y:cyp+(Math.random()-.5)*60,
+          vx:(Math.random()-.5)*20, vy:-Math.random()*12-3,
+          r:16+Math.random()*16, c:COLS[(Math.random()*COLS.length)|0], squash:1, kind,
+          rot:Math.random()*6.28,
+          vr: kind==='spinner' ? (Math.random()*0.18+0.18)*(Math.random()<.5?1:-1) : (Math.random()-.5)*0.05 });
+      }
+      if(squishes.length>80) squishes.splice(0, squishes.length-80);   // cap so the pile can't grow forever
+      if(!raf) loop();
+    }
+    function loop(){
+      cx.clearRect(0,0,cv.width,cv.height);
+      // integrate + floor/walls
+      for(const s of squishes){
+        s.vy+=G; s.x+=s.vx; s.y+=s.vy;
+        if(s.y+s.r>cv.height){ s.y=cv.height-s.r; if(s.vy>4)s.squash=.6; s.vy*=-REST; s.vx*=.94; if(Math.abs(s.vy)<1.2)s.vy=0; }
+        if(s.x<s.r){ s.x=s.r; s.vx*=-REST; } if(s.x>cv.width-s.r){ s.x=cv.width-s.r; s.vx*=-REST; }
+        s.squash+=(1-s.squash)*0.15; s.rot+=s.vr;
+      }
+      // solid collisions: push apart + bounce (equal mass)
+      for(let i=0;i<squishes.length;i++) for(let j=i+1;j<squishes.length;j++){
+        const a=squishes[i], b=squishes[j]; let dx=b.x-a.x, dy=b.y-a.y; let d=Math.hypot(dx,dy)||0.001; const min=a.r+b.r;
+        if(d<min){ const nx=dx/d, ny=dy/d, ov=(min-d)/2;
+          a.x-=nx*ov; a.y-=ny*ov; b.x+=nx*ov; b.y+=ny*ov;
+          const vn=(b.vx-a.vx)*nx+(b.vy-a.vy)*ny;
+          if(vn<0){ const imp=-(1+REST)*vn/2; a.vx-=imp*nx; a.vy-=imp*ny; b.vx+=imp*nx; b.vy+=imp*ny; }
+        }
+      }
+      for(const s of squishes) drawFidget(s);
+      raf=requestAnimationFrame(loop);
+    }
+    function roundRect(x,y,w,h,r){ cx.beginPath(); cx.moveTo(x+r,y);
+      cx.arcTo(x+w,y,x+w,y+h,r); cx.arcTo(x+w,y+h,x,y+h,r); cx.arcTo(x,y+h,x,y,r); cx.arcTo(x,y,x+w,y,r); cx.closePath(); }
+    function drawFidget(s){
+      const r=s.r; cx.save(); cx.translate(s.x,s.y); cx.rotate(s.rot); cx.scale(2-s.squash, s.squash); cx.fillStyle=s.c;
+      if(s.kind==='ball'){ cx.beginPath(); cx.arc(0,0,r,0,7); cx.fill();
+        cx.fillStyle='rgba(255,255,255,.5)'; cx.beginPath(); cx.arc(-r*.3,-r*.3,r*.25,0,7); cx.fill(); }
+      else if(s.kind==='noodle'){ roundRect(-r*1.3,-r*.5,r*2.6,r,r*.5); cx.fill(); }                 // stretchy
+      else if(s.kind==='cube'){ roundRect(-r,-r,r*2,r*2,r*.35); cx.fill();
+        cx.fillStyle='rgba(255,255,255,.5)'; cx.beginPath(); cx.arc(0,0,r*.28,0,7); cx.fill(); }       // press-button
+      else if(s.kind==='popit'){ roundRect(-r,-r,r*2,r*2,r*.5); cx.fill();
+        cx.fillStyle='rgba(0,0,0,.13)'; for(let a=-1;a<=1;a++)for(let b=-1;b<=1;b++){ cx.beginPath(); cx.arc(a*r*.55,b*r*.55,r*.2,0,7); cx.fill(); } }
+      else { for(let k=0;k<3;k++){ cx.save(); cx.rotate(k*2.094);                                     // spinner: 3 arms
+          roundRect(-r*.2,-r,r*.4,r,r*.2); cx.fill(); cx.beginPath(); cx.arc(0,-r,r*.5,0,7); cx.fill(); cx.restore(); }
+        cx.fillStyle='rgba(255,255,255,.6)'; cx.beginPath(); cx.arc(0,0,r*.4,0,7); cx.fill(); }
+      cx.restore();
+    }
+
+    renderStage();
+  </script>
+</body>
+</html>

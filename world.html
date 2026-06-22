@@ -31,7 +31,7 @@
 </head>
 <body>
   <div id="dot"></div>
-  <div id="ver">forest v12</div>
+  <div id="ver">forest v13</div>
   <div id="start"><div class="ring">🌲</div></div>
 
   <script type="importmap">
@@ -101,6 +101,7 @@
     // ---- a cute low-poly 3D axolotl, built from primitives (faces +Z) ----
     function makeAxolotl() {
       const g = new THREE.Group();
+      const gills = [];
       const pink   = new THREE.MeshStandardMaterial({ color: 0xff7bb0, roughness: .85 });
       const pink2  = new THREE.MeshStandardMaterial({ color: 0xffb0d6, roughness: .9 });
       const purple = new THREE.MeshStandardMaterial({ color: 0x8e54d6, roughness: .8 });
@@ -134,13 +135,15 @@
         gill.position.set(.8 * s, .4, .5);                  // emerge from the side of the head
         gill.rotation.x = -0.3;                              // slight back-sweep
         gill.rotation.z = -s * (0.9 + i * 0.35);            // point OUT to the side (−s = outward), fanned up
-        g.add(gill);
+        gill.userData = { baseX: -0.3, phase: i * 0.8 + (s < 0 ? 1.6 : 0) };
+        g.add(gill); gills.push(gill);
       }
       // paddle tail
       const tail = new THREE.Mesh(new THREE.ConeGeometry(.5, 1.3, 12), pink);
       tail.scale.set(1, .4, 1); tail.rotation.x = -Math.PI / 2; tail.position.set(0, 0, -1.35); g.add(tail);
       // stubby feet
       for (const sx of [-1, 1]) for (const sz of [.65, -.5]) ball(.22, pink, 1, .6, 1.2, .78 * sx, -.7, sz);
+      g.userData.gills = gills;
       return g;
     }
     const axo = makeAxolotl();
@@ -190,6 +193,8 @@
       }
       axo.rotation.y = Math.atan2(camera.position.x - GLADE.x, camera.position.z - GLADE.z);  // face the player
       axo.position.y = 1.9 + Math.sin(clock.elapsedTime * 1.6) * 0.12;    // gentle bob
+      for (const gl of axo.userData.gills)                                // feathery gills sway underwater
+        gl.rotation.x = gl.userData.baseX + Math.sin(clock.elapsedTime * 2 + gl.userData.phase) * 0.14;
       portal.scale.setScalar(1 + Math.sin(clock.elapsedTime * 2) * 0.04); // gentle pulse
       portal.rotation.z += dt * 0.3;
       renderer.render(scene, camera);

@@ -31,7 +31,7 @@
 </head>
 <body>
   <div id="dot"></div>
-  <div id="ver">forest v15</div>
+  <div id="ver">forest v16</div>
   <div id="start"><div class="ring">🌲</div></div>
 
   <script type="importmap">
@@ -46,8 +46,8 @@
 
     const TEAL = 0x14b8a6, SKY = 0x5eead4;
     const GLADE = new THREE.Vector3(0, 0, -14);   // glade 1 (name lesson) — straight ahead
-    const GLADE2 = new THREE.Vector3(-11, 0, -16); // glade 2 (j & k) — off to the left
-    const GLADE3 = new THREE.Vector3(11, 0, -16);  // glade 3 (d & f) — off to the right
+    const GLADE2 = new THREE.Vector3(11, 0, -16);  // glade 2 (j & k) — off to the RIGHT (right hand)
+    const GLADE3 = new THREE.Vector3(-11, 0, -16); // glade 3 (d & f) — off to the LEFT (left hand)
 
     const renderer = new THREE.WebGLRenderer({ antialias: true });
     renderer.setPixelRatio(Math.min(devicePixelRatio, 2));

@@ -61,11 +61,13 @@
     <div id="pips"></div>
     <div id="key"></div>
   </main>
-  <div id="ver">j k v5</div>
+  <div id="ver">j k v6</div>
 
   <script>
-    const STAGES = [ { letter:'j', finger:'f-index' }, { letter:'k', finger:'f-middle' } ];
-    let stage = 0, presses = 0, busy = false;
+    const FINGER = { j:'f-index', k:'f-middle' };
+    function randomSeq(n){ let s=''; for(let i=0;i<n;i++) s+=Math.random()<0.5?'j':'k'; return s; }
+    const STAGES = ['jjjjj', 'kkkkk', 'jkjkjkjk', 'jjkkjjkkjjkk', randomSeq(18)];
+    let stage = 0, idx = 0, busy = false;
     const keyEl = document.getElementById('key'), pipsEl = document.getElementById('pips'), handEl = document.getElementById('hand');
 
     (function(){ const bg=document.getElementById('bg');
@@ -75,52 +77,57 @@
         b.style.animationDelay=(-Math.random()*20)+'s'; bg.appendChild(b);} })();
 
     function renderStage(){
-      const st = STAGES[stage];
-      keyEl.textContent = st.letter; keyEl.className = '';
-      pipsEl.innerHTML = ''; for(let i=0;i<5;i++){ const p=document.createElement('div'); p.className='pip'; pipsEl.appendChild(p); }
+      const seq = STAGES[stage];
+      pipsEl.innerHTML = '';
+      const sz = Math.min(7, 46 / seq.length);
+      pipsEl.style.gap = Math.min(2.4, 16 / seq.length) + 'vmin';
+      for(let i=0;i<seq.length;i++){ const p=document.createElement('div'); p.className='pip';
+        p.style.width=p.style.height=sz+'vmin'; pipsEl.appendChild(p); }
+      idx = 0; showCurrent();
+    }
+    function showCurrent(){
+      const ch = STAGES[stage][idx];
+      keyEl.textContent = ch; keyEl.className = '';
       document.querySelectorAll('.finger').forEach(f=>f.classList.remove('active'));
       document.querySelectorAll('.spark').forEach(s=>s.remove());
-      const fin = handEl.querySelector('.'+st.finger); fin.classList.add('active');
+      const fin = handEl.querySelector('.'+FINGER[ch]); fin.classList.add('active');   // glowing finger switches per letter
       for(let i=0;i<3;i++){ const sp=document.createElement('div'); sp.className='spark'; sp.textContent='✨';
         sp.style.left=(fin.offsetLeft/handEl.offsetWidth*100 + (i-1)*4)+'%';
         sp.style.bottom=(60+i*10)+'%'; sp.style.animationDelay=(i*0.3)+'s'; handEl.appendChild(sp); }
-      presses = 0;
     }
-
     function press(){
-      busy = true;
-      const fin = handEl.querySelector('.'+STAGES[stage].finger);
+      const seq = STAGES[stage];
+      const fin = handEl.querySelector('.'+FINGER[seq[idx]]);
       fin.classList.add('tap'); setTimeout(()=>fin.classList.remove('tap'),120);
-      tone(presses);
-      const p = pipsEl.children[presses]; p.classList.add('on');
-      p.style.background = COLS[presses % COLS.length]; p.style.borderColor = 'rgba(255,255,255,.8)';
-      presses++;
-      if(presses>=5){ squishBurst(); setTimeout(next, 1600); }
-      else busy = false;
+      tone(idx);
+      const p = pipsEl.children[idx]; p.classList.add('on');
+      p.style.background = COLS[idx % COLS.length]; p.style.borderColor = 'rgba(255,255,255,.8)';
+      idx++;
+      if(idx >= seq.length){ busy = true; chord(); squishBurst(); setTimeout(next, 1600); }
+      else showCurrent();
     }
-    function next(){
-      if(stage < STAGES.length-1){ stage++; renderStage(); busy=false; }
-      else { stage=0; renderStage(); busy=false; }
-    }
+    function next(){ stage = (stage + 1) % STAGES.length; renderStage(); busy = false; }
 
     addEventListener('keydown',(e)=>{
       if(busy || e.key.length!==1) return;
-      if(e.key.toLowerCase()===STAGES[stage].letter) press();
+      if(e.key.toLowerCase()===STAGES[stage][idx]) press();
       else { keyEl.classList.remove('nope'); void keyEl.offsetWidth; keyEl.classList.add('nope'); }
     });
 
     let actx=null;
+    function ac(){ if(!actx) actx=new (window.AudioContext||window.webkitAudioContext)(); if(actx.state==='suspended') actx.resume(); return actx; }
     function tone(n){
-      if(!actx) actx=new (window.AudioContext||window.webkitAudioContext)();
-      if(actx.state==='suspended') actx.resume();
-      const freqs=[330,392,440,523,659], t=actx.currentTime;
-      const o=actx.createOscillator(), g=actx.createGain();
-      o.type='triangle'; o.frequency.value=freqs[Math.min(n,4)];
+      const c=ac(), t=c.currentTime, freqs=[330,370,415,440,494,554,622,659];
+      const o=c.createOscillator(), g=c.createGain();
+      o.type='triangle'; o.frequency.value=freqs[n % freqs.length];
       g.gain.setValueAtTime(.0001,t); g.gain.exponentialRampToValueAtTime(.4,t+.02); g.gain.exponentialRampToValueAtTime(.0001,t+.4);
-      o.connect(g).connect(actx.destination); o.start(t); o.stop(t+.45);
-      if(n>=4){ [784,988].forEach((f)=>{ const o2=actx.createOscillator(),g2=actx.createGain(); o2.type='triangle'; o2.frequency.value=f;
-          g2.gain.setValueAtTime(.0001,t+.05); g2.gain.exponentialRampToValueAtTime(.3,t+.08); g2.gain.exponentialRampToValueAtTime(.0001,t+.6);
-          o2.connect(g2).connect(actx.destination); o2.start(t+.05); o2.stop(t+.65); }); }
+      o.connect(g).connect(c.destination); o.start(t); o.stop(t+.45);
+    }
+    function chord(){
+      const c=ac(), t=c.currentTime;
+      [659,784,988].forEach((f,k)=>{ const o=c.createOscillator(),g=c.createGain(); o.type='triangle'; o.frequency.value=f;
+        g.gain.setValueAtTime(.0001,t+k*.04); g.gain.exponentialRampToValueAtTime(.3,t+.05+k*.04); g.gain.exponentialRampToValueAtTime(.0001,t+.7);
+        o.connect(g).connect(c.destination); o.start(t+k*.04); o.stop(t+.75); });
     }
 
     const cv=document.getElementById('squish'), cx=cv.getContext('2d');

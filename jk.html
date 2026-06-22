@@ -61,12 +61,12 @@
     <div id="pips"></div>
     <div id="key"></div>
   </main>
-  <div id="ver">j k v6</div>
+  <div id="ver">j k v7</div>
 
   <script>
     const FINGER = { j:'f-index', k:'f-middle' };
     function randomSeq(n){ let s=''; for(let i=0;i<n;i++) s+=Math.random()<0.5?'j':'k'; return s; }
-    const STAGES = ['jjjjj', 'kkkkk', 'jkjkjkjk', 'jjkkjjkkjjkk', randomSeq(18)];
+    const STAGES = ['jjjjjjjj', 'kkkkkkkk', 'jkjkjkjk', 'jjkkjjkkjjkkjjkk', randomSeq(16)];
     let stage = 0, idx = 0, busy = false;
     const keyEl = document.getElementById('key'), pipsEl = document.getElementById('pips'), handEl = document.getElementById('hand');
 
@@ -117,9 +117,11 @@
     let actx=null;
     function ac(){ if(!actx) actx=new (window.AudioContext||window.webkitAudioContext)(); if(actx.state==='suspended') actx.resume(); return actx; }
     function tone(n){
-      const c=ac(), t=c.currentTime, freqs=[330,370,415,440,494,554,622,659];
+      const c=ac(), t=c.currentTime;
+      const scale=[1, 9/8, 5/4, 4/3, 3/2, 5/3, 15/8, 2];               // major scale; index 7 = the octave
+      const freq = 262 * Math.pow(2, Math.floor(n/8)) * scale[n%8];    // climbs; every 8th note lands on an octave
       const o=c.createOscillator(), g=c.createGain();
-      o.type='triangle'; o.frequency.value=freqs[n % freqs.length];
+      o.type='triangle'; o.frequency.value=freq;
       g.gain.setValueAtTime(.0001,t); g.gain.exponentialRampToValueAtTime(.4,t+.02); g.gain.exponentialRampToValueAtTime(.0001,t+.4);
       o.connect(g).connect(c.destination); o.start(t); o.stop(t+.45);
     }

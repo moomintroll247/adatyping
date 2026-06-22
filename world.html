@@ -31,7 +31,7 @@
 </head>
 <body>
   <div id="dot"></div>
-  <div id="ver">forest v13</div>
+  <div id="ver">forest v14</div>
   <div id="start"><div class="ring">🌲</div></div>
 
   <script type="importmap">
@@ -45,7 +45,8 @@
     import { PointerLockControls } from 'three/addons/controls/PointerLockControls.js';
 
     const TEAL = 0x14b8a6, SKY = 0x5eead4;
-    const GLADE = new THREE.Vector3(0, 0, -14);   // where the open glade is (closer = visible from spawn)
+    const GLADE = new THREE.Vector3(0, 0, -14);   // glade 1 (name lesson) — straight ahead
+    const GLADE2 = new THREE.Vector3(-11, 0, -16); // glade 2 (j & k) — off to the left
 
     const renderer = new THREE.WebGLRenderer({ antialias: true });
     renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
@@ -87,7 +88,8 @@
       const x = (Math.random() * 2 - 1) * 80;
       const z = -6 - Math.random() * 90;             // only ahead of the player, never at spawn
       if (Math.abs(x) < 7) continue;                 // keep a wide clear corridor down the path
-      if (Math.hypot(x - GLADE.x, z - GLADE.z) < 9) continue;  // keep the glade itself clear
+      if (Math.hypot(x - GLADE.x, z - GLADE.z) < 9) continue;   // keep glade 1 clear
+      if (Math.hypot(x - GLADE2.x, z - GLADE2.z) < 7) continue;  // keep glade 2 clear
       tree(x, z);
     }
 
@@ -97,6 +99,12 @@
       new THREE.MeshBasicMaterial({ color: 0xff6b9d })     // pink — pops against teal, matches the axolotl
     );
     portal.position.set(GLADE.x, 3, GLADE.z); scene.add(portal);
+    // glade 2 portal (purple — the j & k squishy glade)
+    const portal2 = new THREE.Mesh(
+      new THREE.TorusGeometry(3.2, 0.5, 16, 48),
+      new THREE.MeshBasicMaterial({ color: 0xa78bfa })
+    );
+    portal2.position.set(GLADE2.x, 3, GLADE2.z); scene.add(portal2);
 
     // ---- a cute low-poly 3D axolotl, built from primitives (faces +Z) ----
     function makeAxolotl() {
@@ -190,6 +198,8 @@
         // walked into the glade → start the typing lesson
         const d = Math.hypot(camera.position.x - GLADE.x, camera.position.z - GLADE.z);
         if (!entered && d < 3.2) { entered = true; location.href = 'index.html'; }
+        const d2 = Math.hypot(camera.position.x - GLADE2.x, camera.position.z - GLADE2.z);
+        if (!entered && d2 < 3.2) { entered = true; location.href = 'jk.html'; }
       }
       axo.rotation.y = Math.atan2(camera.position.x - GLADE.x, camera.position.z - GLADE.z);  // face the player
       axo.position.y = 1.9 + Math.sin(clock.elapsedTime * 1.6) * 0.12;    // gentle bob

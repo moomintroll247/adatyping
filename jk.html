@@ -29,15 +29,15 @@
     .pip { width:7vmin; height:7vmin; border-radius:50%; background:rgba(255,255,255,.18); border:.5vmin solid rgba(255,255,255,.5); }
     .pip.on { animation:pop .35s cubic-bezier(.2,1.5,.4,1) forwards; }
     @keyframes pop { 0%{transform:scale(.4)} 100%{transform:scale(1)} }
-    #hand { position:relative; width:42vmin; height:30vmin; }
-    .palm { position:absolute; bottom:0; left:50%; transform:translateX(-50%); width:30vmin; height:16vmin;
-      background:#f6c79a; border-radius:6vmin 6vmin 4vmin 4vmin; }
-    .finger { position:absolute; bottom:11vmin; width:6vmin; background:#f6c79a; border-radius:3vmin 3vmin 1.5vmin 1.5vmin; transition:transform .1s; }
-    .thumb { bottom:4vmin; left:1vmin; width:5.5vmin; height:11vmin; transform:rotate(35deg); transform-origin:bottom; background:#f0bd8f; }
-    .f-index  { left:8vmin;  height:15vmin; }
-    .f-middle { left:15vmin; height:18vmin; }
-    .f-ring   { left:22vmin; height:15vmin; }
-    .f-pinky  { left:29vmin; height:11vmin; width:5vmin; }
+    #hand { position:relative; width:42vmin; height:38vmin; }
+    .palm { position:absolute; bottom:0; left:50%; transform:translateX(-50%); width:28vmin; height:15vmin;
+      background:#f6c79a; border-radius:5vmin 5vmin 4vmin 4vmin; }
+    .finger { position:absolute; bottom:12vmin; width:4.6vmin; background:#f6c79a; border-radius:2.3vmin 2.3vmin 1.2vmin 1.2vmin; transition:transform .1s; }
+    .thumb { bottom:5vmin; left:2vmin; width:4.8vmin; height:12vmin; transform:rotate(40deg); transform-origin:bottom; background:#f0bd8f; }
+    .f-index  { left:9vmin;  height:19vmin; }
+    .f-middle { left:15vmin; height:23vmin; }
+    .f-ring   { left:21vmin; height:19vmin; }
+    .f-pinky  { left:27vmin; height:14vmin; width:4vmin; }
     .finger.active { background:var(--gold); box-shadow:0 0 5vmin 1vmin rgba(255,210,63,.7); animation:wig 1.4s ease-in-out infinite; }
     @keyframes wig { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-1vmin)} }
     .finger.tap { transform:translateY(2.5vmin) scaleY(.9); }
@@ -61,7 +61,7 @@
     <div id="pips"></div>
     <div id="key"></div>
   </main>
-  <div id="ver">j k v1</div>
+  <div id="ver">j k v2</div>
 
   <script>
     const STAGES = [ { letter:'j', finger:'f-index' }, { letter:'k', finger:'f-middle' } ];
@@ -127,29 +127,36 @@
     addEventListener('resize',fit); fit();
     const COLS=['#ff8fc0','#2dd4bf','#a78bfa','#ffd23f','#ff924c','#5eead4','#ff6b9d'];
     let squishes=[], raf=null;
-    const BUCKETS=24; let pile=new Array(BUCKETS).fill(0);
+    const G=0.75, REST=0.5;                       // gravity + bounciness (solid but springy)
     function squishBurst(){
       const cxp=innerWidth/2, cyp=innerHeight*0.45;
-      for(let i=0;i<34;i++) squishes.push({
-        x:cxp+(Math.random()-.5)*120, y:cyp,
-        vx:(Math.random()-.5)*22, vy:-Math.random()*14-4,
-        r:18+Math.random()*22, c:COLS[(Math.random()*COLS.length)|0], settled:false, squash:1 });
+      for(let i=0;i<30;i++) squishes.push({
+        x:cxp+(Math.random()-.5)*100, y:cyp+(Math.random()-.5)*60,
+        vx:(Math.random()-.5)*20, vy:-Math.random()*12-3,
+        r:16+Math.random()*16, c:COLS[(Math.random()*COLS.length)|0], squash:1 });
       if(!raf) loop();
     }
     function loop(){
       cx.clearRect(0,0,cv.width,cv.height);
+      // integrate + floor/walls
       for(const s of squishes){
-        if(!s.settled){
-          s.vy+=0.9; s.x+=s.vx; s.y+=s.vy; s.vx*=0.99;
-          if(s.x<s.r){s.x=s.r;s.vx*=-.5} if(s.x>cv.width-s.r){s.x=cv.width-s.r;s.vx*=-.5}
-          const b=Math.max(0,Math.min(BUCKETS-1,(s.x/cv.width*BUCKETS)|0));
-          const floor=cv.height-pile[b];
-          if(s.y+s.r>=floor && s.vy>0){ s.y=floor-s.r; s.settled=true; s.squash=1.25; pile[b]+=s.r*1.1; }
-        } else { s.squash+=(1-s.squash)*0.2; }
-        cx.fillStyle=s.c;
-        cx.save(); cx.translate(s.x,s.y); cx.scale(s.squash,2-s.squash);
-        roundRect(-s.r,-s.r,s.r*2,s.r*2,s.r*0.6); cx.fill(); cx.restore();
+        s.vy+=G; s.x+=s.vx; s.y+=s.vy;
+        if(s.y+s.r>cv.height){ s.y=cv.height-s.r; if(s.vy>4)s.squash=.6; s.vy*=-REST; s.vx*=.94; if(Math.abs(s.vy)<1.2)s.vy=0; }
+        if(s.x<s.r){ s.x=s.r; s.vx*=-REST; } if(s.x>cv.width-s.r){ s.x=cv.width-s.r; s.vx*=-REST; }
+        s.squash+=(1-s.squash)*0.15;
       }
+      // solid collisions: push apart + bounce (equal mass)
+      for(let i=0;i<squishes.length;i++) for(let j=i+1;j<squishes.length;j++){
+        const a=squishes[i], b=squishes[j]; let dx=b.x-a.x, dy=b.y-a.y; let d=Math.hypot(dx,dy)||0.001; const min=a.r+b.r;
+        if(d<min){ const nx=dx/d, ny=dy/d, ov=(min-d)/2;
+          a.x-=nx*ov; a.y-=ny*ov; b.x+=nx*ov; b.y+=ny*ov;
+          const vn=(b.vx-a.vx)*nx+(b.vy-a.vy)*ny;
+          if(vn<0){ const imp=-(1+REST)*vn/2; a.vx-=imp*nx; a.vy-=imp*ny; b.vx+=imp*nx; b.vy+=imp*ny; }
+        }
+      }
+      // draw (squishy = slight squash)
+      for(const s of squishes){ cx.fillStyle=s.c; cx.save(); cx.translate(s.x,s.y); cx.scale(2-s.squash, s.squash);
+        roundRect(-s.r,-s.r,s.r*2,s.r*2,s.r*0.55); cx.fill(); cx.restore(); }
       raf=requestAnimationFrame(loop);
     }
     function roundRect(x,y,w,h,r){ cx.beginPath(); cx.moveTo(x+r,y);

@@ -31,7 +31,7 @@
 </head>
 <body>
   <div id="dot"></div>
-  <div id="ver">forest v19</div>
+  <div id="ver">forest v20</div>
   <div id="start"><div class="ring">🌲</div></div>
 
   <script type="importmap">
@@ -49,6 +49,10 @@
     const GLADE2 = new THREE.Vector3(11, 0, -16);  // glade 2 (j & k) — off to the RIGHT (right hand)
     const GLADE3 = new THREE.Vector3(-11, 0, -16); // glade 3 (d & f) — off to the LEFT (left hand)
     const GLADE4 = new THREE.Vector3(6, 0, -30);   // glade 4 (earring studio, l) — deeper down the path
+    const GLADE5 = new THREE.Vector3(-6, 0, -30);  // glade 5 (snail spa, s)
+    const GLADE6 = new THREE.Vector3(14, 0, -36);  // glade 6 (ant parade, a)
+    const GLADE7 = new THREE.Vector3(-14, 0, -36); // glade 7 (the wink, ;)
+    const GLADE8 = new THREE.Vector3(0, 0, -44);   // glade 8 (butterfly wings, a & ;)
 
     const renderer = new THREE.WebGLRenderer({ antialias: true });
     renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
@@ -122,6 +126,10 @@
       if (Math.hypot(x - GLADE2.x, z - GLADE2.z) < 7) continue;  // keep glade 2 clear
       if (Math.hypot(x - GLADE3.x, z - GLADE3.z) < 7) continue;  // keep glade 3 clear
       if (Math.hypot(x - GLADE4.x, z - GLADE4.z) < 7) continue;  // keep glade 4 clear
+      if (Math.hypot(x - GLADE5.x, z - GLADE5.z) < 7) continue;
+      if (Math.hypot(x - GLADE6.x, z - GLADE6.z) < 7) continue;
+      if (Math.hypot(x - GLADE7.x, z - GLADE7.z) < 7) continue;
+      if (Math.hypot(x - GLADE8.x, z - GLADE8.z) < 7) continue;
       tree(x, z);
     }
 
@@ -132,6 +140,10 @@
       if (Math.hypot(x - GLADE2.x, z - GLADE2.z) < pad) return false;
       if (Math.hypot(x - GLADE3.x, z - GLADE3.z) < pad) return false;
       if (Math.hypot(x - GLADE4.x, z - GLADE4.z) < pad) return false;
+      if (Math.hypot(x - GLADE5.x, z - GLADE5.z) < pad) return false;
+      if (Math.hypot(x - GLADE6.x, z - GLADE6.z) < pad) return false;
+      if (Math.hypot(x - GLADE7.x, z - GLADE7.z) < pad) return false;
+      if (Math.hypot(x - GLADE8.x, z - GLADE8.z) < pad) return false;
       return true;
     }
     function mushroom(x, z, s) {
@@ -189,6 +201,50 @@
       new THREE.MeshStandardMaterial({ color: 0xff8fc0, emissive: 0xff6b9d, emissiveIntensity: .45, roughness: .15, metalness: .6, flatShading: true })
     );
     gem.position.set(GLADE4.x, 3, GLADE4.z + 0.2); scene.add(gem);
+    // glade 5 portal (lilac — the snail spa) + a spiral-shell swirl
+    const portal5 = new THREE.Mesh(new THREE.TorusGeometry(3.2, 0.5, 16, 48), new THREE.MeshBasicMaterial({ color: 0xa78bfa }));
+    portal5.position.set(GLADE5.x, 3, GLADE5.z); scene.add(portal5);
+    const swirl = new THREE.Mesh(
+      new THREE.TorusGeometry(0.9, 0.38, 12, 32),
+      new THREE.MeshStandardMaterial({ color: 0xe8c79b, roughness: .6 })
+    );
+    swirl.position.set(GLADE5.x, 3, GLADE5.z + 0.2); scene.add(swirl);
+    // glade 6 portal (green — the ant parade) + three little ants in a row
+    const portal6 = new THREE.Mesh(new THREE.TorusGeometry(3.2, 0.5, 16, 48), new THREE.MeshBasicMaterial({ color: 0x4ade80 }));
+    portal6.position.set(GLADE6.x, 3, GLADE6.z); scene.add(portal6);
+    const antRow = new THREE.Group();
+    const antMat = new THREE.MeshStandardMaterial({ color: 0x4a2c14, roughness: .8 });
+    for (let k = 0; k < 3; k++) {
+      const a = new THREE.Group();
+      [[0.32, 0, 0, 0], [0.26, 0, 0.45, 0], [0.22, 0, 0.82, 0]].forEach(([r,, zz]) => {
+        const b = new THREE.Mesh(new THREE.SphereGeometry(r, 12, 10), antMat); b.position.z = zz; a.add(b); });
+      a.position.x = (k - 1) * 1.1; a.rotation.y = Math.PI / 2; antRow.add(a);
+    }
+    antRow.position.set(GLADE6.x, 2.6, GLADE6.z + 0.2); scene.add(antRow);
+    // glade 7 portal (orange — the wink) + a peach face mid-wink
+    const portal7 = new THREE.Mesh(new THREE.TorusGeometry(3.2, 0.5, 16, 48), new THREE.MeshBasicMaterial({ color: 0xfb923c }));
+    portal7.position.set(GLADE7.x, 3, GLADE7.z); scene.add(portal7);
+    const winkFace = new THREE.Group();
+    const wf = new THREE.Mesh(new THREE.SphereGeometry(1.05, 20, 16), new THREE.MeshStandardMaterial({ color: 0xffe0b3, roughness: .85 }));
+    winkFace.add(wf);
+    const eyeMat = new THREE.MeshStandardMaterial({ color: 0x2a1133 });
+    const eyeO = new THREE.Mesh(new THREE.SphereGeometry(0.16, 10, 8), eyeMat); eyeO.position.set(-0.38, 0.22, 0.92); winkFace.add(eyeO);
+    const eyeW = new THREE.Mesh(new THREE.BoxGeometry(0.3, 0.05, 0.08), eyeMat); eyeW.position.set(0.38, 0.22, 0.98); winkFace.add(eyeW);  // the winking eye
+    const mouth = new THREE.Mesh(new THREE.TorusGeometry(0.26, 0.05, 8, 16, Math.PI), eyeMat);
+    mouth.position.set(0, -0.28, 0.95); mouth.rotation.z = Math.PI; winkFace.add(mouth);
+    winkFace.position.set(GLADE7.x, 3, GLADE7.z + 0.2); scene.add(winkFace);
+    // glade 8 portal (sky blue — butterfly wings) + a flapping butterfly
+    const portal8 = new THREE.Mesh(new THREE.TorusGeometry(3.2, 0.5, 16, 48), new THREE.MeshBasicMaterial({ color: 0x7dd3fc }));
+    portal8.position.set(GLADE8.x, 3, GLADE8.z); scene.add(portal8);
+    const bfly = new THREE.Group();
+    const bbody = new THREE.Mesh(new THREE.CapsuleGeometry(0.14, 0.9, 4, 10), new THREE.MeshStandardMaterial({ color: 0x2a1133 }));
+    bfly.add(bbody);
+    const wingMat = new THREE.MeshStandardMaterial({ color: 0xff8fc0, emissive: 0xff6b9d, emissiveIntensity: .3, roughness: .5, side: THREE.DoubleSide });
+    const wingL = new THREE.Mesh(new THREE.CircleGeometry(0.85, 20), wingMat);
+    wingL.position.x = -0.55; wingL.scale.y = 1.25; bfly.add(wingL);
+    const wingR = new THREE.Mesh(new THREE.CircleGeometry(0.85, 20), wingMat);
+    wingR.position.x = 0.55; wingR.scale.y = 1.25; bfly.add(wingR);
+    bfly.position.set(GLADE8.x, 3, GLADE8.z + 0.2); scene.add(bfly);
 
     // ---- a cute low-poly 3D axolotl, built from primitives (faces +Z) ----
     function makeAxolotl() {
@@ -426,9 +482,27 @@
         if (!entered && d3 < 3.2) { entered = true; location.href = 'df.html'; }
         const d4 = Math.hypot(camera.position.x - GLADE4.x, camera.position.z - GLADE4.z);
         if (!entered && d4 < 3.2) { entered = true; location.href = 'earrings.html'; }
+        const d5 = Math.hypot(camera.position.x - GLADE5.x, camera.position.z - GLADE5.z);
+        if (!entered && d5 < 3.2) { entered = true; location.href = 'snail.html'; }
+        const d6 = Math.hypot(camera.position.x - GLADE6.x, camera.position.z - GLADE6.z);
+        if (!entered && d6 < 3.2) { entered = true; location.href = 'ants.html'; }
+        const d7 = Math.hypot(camera.position.x - GLADE7.x, camera.position.z - GLADE7.z);
+        if (!entered && d7 < 3.2) { entered = true; location.href = 'wink.html'; }
+        const d8 = Math.hypot(camera.position.x - GLADE8.x, camera.position.z - GLADE8.z);
+        if (!entered && d8 < 3.2) { entered = true; location.href = 'butterfly.html'; }
       }
       gem.rotation.y += dt * 1.2;                                         // the gem twirls like a dangly earring
       gem.position.y = 3 + Math.sin(clock.elapsedTime * 1.7 + 3) * 0.25;
+      swirl.rotation.z += dt * 0.8;                                       // shell swirl spins lazily
+      swirl.position.y = 3 + Math.sin(clock.elapsedTime * 1.4 + 1) * 0.2;
+      antRow.position.y = 2.6 + Math.sin(clock.elapsedTime * 2.2) * 0.15; // ants bob along
+      antRow.rotation.y = Math.atan2(camera.position.x - GLADE6.x, camera.position.z - GLADE6.z) + Math.PI / 2;
+      winkFace.rotation.y = Math.atan2(camera.position.x - GLADE7.x, camera.position.z - GLADE7.z);  // face the player
+      winkFace.position.y = 3 + Math.sin(clock.elapsedTime * 1.6 + 2) * 0.18;
+      const fl = 0.35 + Math.abs(Math.sin(clock.elapsedTime * 4)) * 0.65; // wings flap
+      wingL.scale.x = fl; wingR.scale.x = fl;
+      bfly.rotation.y = Math.atan2(camera.position.x - GLADE8.x, camera.position.z - GLADE8.z);
+      bfly.position.y = 3 + Math.sin(clock.elapsedTime * 2.4 + 4) * 0.3;
       axo.rotation.y = Math.atan2(camera.position.x - GLADE.x, camera.position.z - GLADE.z);  // face the player
       axo.position.y = 1.9 + Math.sin(clock.elapsedTime * 1.6) * 0.12;    // gentle bob
       for (const gl of axo.userData.gills)                                // feathery gills sway underwater

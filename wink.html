@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>the wink</title>
+  <style>
+    :root { --peach:#fb923c; --peach-deep:#c2410c; --peach-bright:#fdba74; --cream:#fdfdfb; --gold:#ffd23f; }
+    * { box-sizing:border-box; margin:0; padding:0; }
+    html,body { height:100%; overflow:hidden; }
+    body { background:linear-gradient(160deg,#7c2d12,#ea580c 55%,#fb923c);
+           font-family:"Baloo 2","Comic Sans MS",system-ui,sans-serif; user-select:none; -webkit-user-select:none; touch-action:manipulation; }
+    #bg { position:fixed; inset:0; overflow:hidden; z-index:0; }
+    .bubble { position:absolute; bottom:-25vh; border-radius:50%;
+      background:radial-gradient(circle at 35% 30%,rgba(255,255,255,.5),rgba(255,255,255,.05)); animation:rise linear infinite; }
+    @keyframes rise { 0%{transform:translateY(0);opacity:0} 12%{opacity:.7} 88%{opacity:.7} 100%{transform:translateY(-135vh) translateX(var(--drift,0));opacity:0} }
+    #squish { position:fixed; inset:0; z-index:40; pointer-events:none; }
+    #toforest { position:fixed; top:2.5vh; left:2.5vw; z-index:60; width:13vmin; height:13vmin; border-radius:50%;
+      display:flex; align-items:center; justify-content:center; font-size:7vmin; text-decoration:none;
+      background:rgba(255,255,255,.2); border:.5vmin solid rgba(255,255,255,.5); }
+    #ver { position:fixed; right:8px; bottom:6px; z-index:100; font:13px/1 ui-monospace,monospace; color:rgba(255,255,255,.6); }
+    #stage { position:relative; z-index:10; height:100%; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:2.5vh; }
+
+    /* ---- the big cute face + its ring of friends ---- */
+    #facewrap { position:relative; width:64vmin; height:32vmin; }
+    #face { position:absolute; left:50%; top:50%; transform:translate(-50%,-50%); width:26vmin; height:26vmin;
+      border-radius:50%; background:#ffe0b3; box-shadow:0 1vmin 0 rgba(0,0,0,.15), inset 0 -2vmin 0 rgba(0,0,0,.05); }
+    .eye { position:absolute; top:9vmin; width:3.4vmin; height:4.2vmin; background:#2a1133; border-radius:50%; }
+    .eye.e1 { left:6.5vmin; } .eye.e2 { right:6.5vmin; }
+    .eye::after { content:''; position:absolute; top:.6vmin; left:.6vmin; width:1.2vmin; height:1.4vmin;
+      background:#fff; border-radius:50%; opacity:.9; }
+    #face.wink .eye.e2 { animation:winkeye .5s ease-in-out; }
+    @keyframes winkeye { 0%,100%{transform:scaleY(1)} 35%,65%{transform:scaleY(.08) translateY(2vmin)} }
+    #mouth { position:absolute; left:50%; transform:translateX(-50%); bottom:5.5vmin; width:8vmin; height:4vmin;
+      border:.9vmin solid #2a1133; border-top:none; border-radius:0 0 8vmin 8vmin; }
+    .blush { position:absolute; top:14.5vmin; width:4vmin; height:2.4vmin; background:#ff9ec4; border-radius:50%; opacity:0; transition:opacity .3s; }
+    .blush.b1 { left:2.6vmin; } .blush.b2 { right:2.6vmin; }
+    #face.wink .blush { opacity:.85; }
+    .friend { position:absolute; font-size:9vmin; line-height:1; transform:scale(0); animation:fpop .5s cubic-bezier(.2,1.5,.4,1) forwards; }
+    @keyframes fpop { 0%{transform:scale(0) rotate(-30deg)} 100%{transform:scale(1) rotate(0)} }
+    .friend.wave { animation:fwave .55s ease-in-out; }
+    @keyframes fwave { 0%,100%{transform:scale(1) rotate(0)} 40%{transform:scale(1.3) rotate(-14deg)} 70%{transform:scale(1.15) rotate(10deg)} }
+
+    #key { width:24vmin; height:24vmin; border-radius:26px; background:var(--cream);
+      display:flex; align-items:center; justify-content:center; font-size:15vmin; font-weight:800; color:var(--peach-deep);
+      box-shadow:0 1.2vmin 0 rgba(0,0,0,.18), inset 0 0 0 .8vmin var(--peach-bright); }
+    #key.nope { animation:nope .35s; }
+    @keyframes nope { 0%,100%{transform:translateX(0)} 25%{transform:translateX(-2vmin)} 75%{transform:translateX(2vmin)} }
+
+    #hand { position:relative; width:42vmin; height:30vmin; }   /* RIGHT hand */
+    .palm { position:absolute; bottom:0; left:50%; transform:translateX(-50%); width:28vmin; height:15vmin;
+      background:#f6c79a; border-radius:5vmin 5vmin 4vmin 4vmin; }
+    .finger { position:absolute; bottom:12vmin; width:4.6vmin; background:#f6c79a; border-radius:2.3vmin 2.3vmin 1.2vmin 1.2vmin; transition:transform .1s; }
+    .thumb { bottom:4vmin; left:6vmin; width:4.8vmin; height:11vmin; transform:rotate(-50deg); transform-origin:bottom center; background:#f0bd8f; }
+    .f-index  { left:9vmin;  height:19vmin; }
+    .f-middle { left:15vmin; height:23vmin; }
+    .f-ring   { left:21vmin; height:19vmin; }
+    .f-pinky  { left:27vmin; height:14vmin; width:4vmin; }
+    .finger.active { background:var(--gold); box-shadow:0 0 5vmin 1vmin rgba(255,210,63,.7); animation:wig 1.4s ease-in-out infinite; }
+    @keyframes wig { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-1vmin)} }
+    .finger.tap { transform:translateY(2.5vmin) scaleY(.9); }
+  </style>
+</head>
+<body>
+  <div id="bg"></div>
+  <a id="toforest" href="index.html" aria-label="forest">🌲</a>
+  <canvas id="squish"></canvas>
+  <main id="stage">
+    <div id="facewrap">
+      <div id="face">
+        <div class="eye e1"></div><div class="eye e2"></div>
+        <div class="blush b1"></div><div class="blush b2"></div>
+        <div id="mouth"></div>
+      </div>
+    </div>
+    <div id="key">;</div>
+    <div id="hand">
+      <div class="palm"></div>
+      <div class="finger thumb"></div>
+      <div class="finger f-index"></div>
+      <div class="finger f-middle"></div>
+      <div class="finger f-ring"></div>
+      <div class="finger f-pinky active"></div>
+    </div>
+  </main>
+  <div id="ver">wink v1</div>
+
+  <script>
+    // The ; key IS a winking face. Every press = the big face winks (boop!) and one
+    // more animal friend pops in wanting winks too. Finale: a Mexican wave of winks.
+    const STAGES = [4, 6, 8];
+    const FRIENDS = ['🐰','🦊','🦌','🐱','🐶','🐼','🐸','🐨'];
+    let stage = 0, idx = 0, busy = false;
+    const keyEl = document.getElementById('key'), face = document.getElementById('face'),
+          wrap = document.getElementById('facewrap'), handEl = document.getElementById('hand');
+
+    (function(){ const bg=document.getElementById('bg');
+      for(let i=0;i<12;i++){ const b=document.createElement('div'); b.className='bubble';
+        const s=6+Math.random()*16; b.style.width=b.style.height=s+'vmin'; b.style.left=Math.random()*100+'vw';
+        b.style.setProperty('--drift',(Math.random()*20-10)+'vw'); b.style.animationDuration=(14+Math.random()*14)+'s';
+        b.style.animationDelay=(-Math.random()*20)+'s'; bg.appendChild(b);} })();
+
+    function friendSpot(i){                    // ring around the face, alternating sides
+      const side = i % 2 === 0 ? 1 : -1, step = Math.floor(i/2);
+      const a = -0.9 + step * 0.75;
+      return { x: 50 + side * (30 + step * 2) , y: 46 + Math.sin(a) * 34 };
+    }
+    function renderStage(){ wrap.querySelectorAll('.friend').forEach(e=>e.remove()); idx = 0; }
+    function press(){
+      const n = STAGES[stage];
+      const fin = handEl.querySelector('.f-pinky');
+      fin.classList.add('tap'); setTimeout(()=>fin.classList.remove('tap'),120);
+      face.classList.remove('wink'); void face.offsetWidth; face.classList.add('wink');
+      const f = document.createElement('div'); f.className='friend'; f.textContent=FRIENDS[idx % FRIENDS.length];
+      const p = friendSpot(idx); f.style.left=p.x+'%'; f.style.top=p.y+'%';
+      wrap.appendChild(f);
+      boop(idx);
+      idx++;
+      if(idx >= n){ busy = true; setTimeout(winkWave, 700); setTimeout(next, 3200); }
+    }
+    function winkWave(){                       // everyone winks in a wave
+      const friends=[...wrap.querySelectorAll('.friend')];
+      friends.forEach((f,i)=>setTimeout(()=>{ f.classList.remove('wave'); void f.offsetWidth; f.classList.add('wave'); boopHi(i); }, i*140));
+      setTimeout(()=>{ face.classList.remove('wink'); void face.offsetWidth; face.classList.add('wink'); chord(); squishBurst(); }, friends.length*140+150);
+    }
+    function next(){ stage = (stage + 1) % STAGES.length; renderStage(); busy = false; }
+
+    addEventListener('keydown',(e)=>{
+      if(busy || e.key.length!==1) return;
+      if(e.key===';') press();
+      else { keyEl.classList.remove('nope'); void keyEl.offsetWidth; keyEl.classList.add('nope'); }
+    });
+
+    let actx=null;
+    function ac(){ if(!actx) actx=new (window.AudioContext||window.webkitAudioContext)(); if(actx.state==='suspended') actx.resume(); return actx; }
+    function blip(f1, f2, t, vol, len){        // cheeky little "boop": a quick pitch dip
+      const c=ac(), o=c.createOscillator(), g=c.createGain(); o.type='sine';
+      o.frequency.setValueAtTime(f1,t); o.frequency.exponentialRampToValueAtTime(f2,t+len*0.8);
+      g.gain.setValueAtTime(.0001,t); g.gain.exponentialRampToValueAtTime(vol,t+.02);
+      g.gain.exponentialRampToValueAtTime(.0001,t+len);
+      o.connect(g).connect(c.destination); o.start(t); o.stop(t+len+.05);
+    }
+    const SCALE=[1, 9/8, 5/4, 4/3, 3/2, 5/3, 15/8, 2];
+    function boop(n){ const f=440*SCALE[n%8]; blip(f*1.3, f, ac().currentTime, .35, .22); }
+    function boopHi(n){ const f=660*SCALE[n%8]; blip(f*1.25, f, ac().currentTime, .25, .18); }
+    function chord(){
+      const c=ac(), t=c.currentTime;
+      [523,659,784,1047].forEach((f,k)=>{ const o=c.createOscillator(),g=c.createGain(); o.type='triangle'; o.frequency.value=f;
+        g.gain.setValueAtTime(.0001,t+k*.04); g.gain.exponentialRampToValueAtTime(.22,t+.05+k*.04); g.gain.exponentialRampToValueAtTime(.0001,t+1.4);
+        o.connect(g).connect(c.destination); o.start(t+k*.04); o.stop(t+1.5); });
+    }
+
+    const cv=document.getElementById('squish'), cx=cv.getContext('2d');
+    function fit(){ cv.width=innerWidth; cv.height=innerHeight; }
+    addEventListener('resize',fit); fit();
+    const COLS=['#fb923c','#fdba74','#ffd23f','#ff8fc0','#fde68a','#f472b6','#ffedd5'];
+    let squishes=[], raf=null;
+    const G=0.75, REST=0.5;
+    function squishBurst(){
+      const cxp=innerWidth/2, cyp=innerHeight*0.45;
+      const KINDS=['cube','circle','sausage'], DECOS=['none','none','dots','face'];
+      for(let i=0;i<30;i++){
+        const deco=DECOS[(Math.random()*DECOS.length)|0], dots=[];
+        if(deco==='dots') for(let k=0;k<4;k++) dots.push({x:(Math.random()-.5)*1.2, y:(Math.random()-.5)*1.2});
+        squishes.push({
+          x:cxp+(Math.random()-.5)*100, y:cyp+(Math.random()-.5)*60,
+          vx:(Math.random()-.5)*20, vy:-Math.random()*12-3,
+          r:16+Math.random()*16, c:COLS[(Math.random()*COLS.length)|0], squash:1,
+          kind:KINDS[(Math.random()*KINDS.length)|0], deco, dots });
+      }
+      if(squishes.length>80) squishes.splice(0, squishes.length-80);
+      if(!raf) loop();
+    }
+    function loop(){
+      cx.clearRect(0,0,cv.width,cv.height);
+      for(const s of squishes){
+        s.vy+=G; s.x+=s.vx; s.y+=s.vy;
+        if(s.y+s.r>cv.height){ s.y=cv.height-s.r; if(s.vy>4)s.squash=.6; s.vy*=-REST; s.vx*=.94; if(Math.abs(s.vy)<1.2)s.vy=0; }
+        if(s.x<s.r){ s.x=s.r; s.vx*=-REST; } if(s.x>cv.width-s.r){ s.x=cv.width-s.r; s.vx*=-REST; }
+        s.squash+=(1-s.squash)*0.15;
+      }
+      for(let i=0;i<squishes.length;i++) for(let j=i+1;j<squishes.length;j++){
+        const a=squishes[i], b=squishes[j]; let dx=b.x-a.x, dy=b.y-a.y; let d=Math.hypot(dx,dy)||0.001; const min=a.r+b.r;
+        if(d<min){ const nx=dx/d, ny=dy/d, ov=(min-d)/2;
+          a.x-=nx*ov; a.y-=ny*ov; b.x+=nx*ov; b.y+=ny*ov;
+          const vn=(b.vx-a.vx)*nx+(b.vy-a.vy)*ny;
+          if(vn<0){ const imp=-(1+REST)*vn/2; a.vx-=imp*nx; a.vy-=imp*ny; b.vx+=imp*nx; b.vy+=imp*ny; }
+        }
+      }
+      for(const s of squishes){
+        cx.save(); cx.translate(s.x,s.y); cx.scale(2-s.squash, s.squash);
+        cx.fillStyle=s.c;
+        if(s.kind==='circle'){ cx.beginPath(); cx.arc(0,0,s.r,0,7); cx.fill(); }
+        else if(s.kind==='sausage'){ roundRect(-s.r*1.3,-s.r*0.62,s.r*2.6,s.r*1.24,s.r*0.62); cx.fill(); }
+        else { roundRect(-s.r,-s.r,s.r*2,s.r*2,s.r*0.5); cx.fill(); }
+        if(s.deco==='dots'){ cx.fillStyle='rgba(255,255,255,.8)';
+          for(const d of s.dots){ cx.beginPath(); cx.arc(d.x*s.r,d.y*s.r,s.r*0.16,0,7); cx.fill(); } }
+        else if(s.deco==='face'){ cx.fillStyle='#2a1133';
+          cx.beginPath(); cx.arc(-s.r*0.32,-s.r*0.12,s.r*0.13,0,7); cx.arc(s.r*0.32,-s.r*0.12,s.r*0.13,0,7); cx.fill();
+          cx.beginPath(); cx.arc(0,s.r*0.05,s.r*0.32,0.15*Math.PI,0.85*Math.PI); cx.lineWidth=s.r*0.09; cx.strokeStyle='#2a1133'; cx.stroke(); }
+        cx.restore();
+      }
+      raf=requestAnimationFrame(loop);
+    }
+    function roundRect(x,y,w,h,r){ cx.beginPath(); cx.moveTo(x+r,y);
+      cx.arcTo(x+w,y,x+w,y+h,r); cx.arcTo(x+w,y+h,x,y+h,r); cx.arcTo(x,y+h,x,y,r); cx.arcTo(x,y,x+w,y,r); cx.closePath(); }
+
+    renderStage();
+  </script>
+</body>
+</html>

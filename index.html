@@ -31,7 +31,7 @@
 </head>
 <body>
   <div id="dot"></div>
-  <div id="ver">forest v18</div>
+  <div id="ver">forest v19</div>
   <div id="start"><div class="ring">🌲</div></div>
 
   <script type="importmap">
@@ -48,6 +48,7 @@
     const GLADE = new THREE.Vector3(0, 0, -14);   // glade 1 (name lesson) — straight ahead
     const GLADE2 = new THREE.Vector3(11, 0, -16);  // glade 2 (j & k) — off to the RIGHT (right hand)
     const GLADE3 = new THREE.Vector3(-11, 0, -16); // glade 3 (d & f) — off to the LEFT (left hand)
+    const GLADE4 = new THREE.Vector3(6, 0, -30);   // glade 4 (earring studio, l) — deeper down the path
 
     const renderer = new THREE.WebGLRenderer({ antialias: true });
     renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
@@ -120,6 +121,7 @@
       if (Math.hypot(x - GLADE.x, z - GLADE.z) < 9) continue;   // keep glade 1 clear
       if (Math.hypot(x - GLADE2.x, z - GLADE2.z) < 7) continue;  // keep glade 2 clear
       if (Math.hypot(x - GLADE3.x, z - GLADE3.z) < 7) continue;  // keep glade 3 clear
+      if (Math.hypot(x - GLADE4.x, z - GLADE4.z) < 7) continue;  // keep glade 4 clear
       tree(x, z);
     }
 
@@ -129,6 +131,7 @@
       if (Math.hypot(x - GLADE.x, z - GLADE.z) < pad) return false;
       if (Math.hypot(x - GLADE2.x, z - GLADE2.z) < pad) return false;
       if (Math.hypot(x - GLADE3.x, z - GLADE3.z) < pad) return false;
+      if (Math.hypot(x - GLADE4.x, z - GLADE4.z) < pad) return false;
       return true;
     }
     function mushroom(x, z, s) {
@@ -175,6 +178,17 @@
       new THREE.MeshBasicMaterial({ color: 0x2dd4bf })
     );
     portal3.position.set(GLADE3.x, 3, GLADE3.z); scene.add(portal3);
+    // glade 4 portal (gold — the earring studio) + a spinning gem that dangles like an earring
+    const portal4 = new THREE.Mesh(
+      new THREE.TorusGeometry(3.2, 0.5, 16, 48),
+      new THREE.MeshBasicMaterial({ color: 0xffd23f })
+    );
+    portal4.position.set(GLADE4.x, 3, GLADE4.z); scene.add(portal4);
+    const gem = new THREE.Mesh(
+      new THREE.OctahedronGeometry(1.1, 0),
+      new THREE.MeshStandardMaterial({ color: 0xff8fc0, emissive: 0xff6b9d, emissiveIntensity: .45, roughness: .15, metalness: .6, flatShading: true })
+    );
+    gem.position.set(GLADE4.x, 3, GLADE4.z + 0.2); scene.add(gem);
 
     // ---- a cute low-poly 3D axolotl, built from primitives (faces +Z) ----
     function makeAxolotl() {
@@ -410,7 +424,11 @@
         if (!entered && d2 < 3.2) { entered = true; location.href = 'jk.html'; }
         const d3 = Math.hypot(camera.position.x - GLADE3.x, camera.position.z - GLADE3.z);
         if (!entered && d3 < 3.2) { entered = true; location.href = 'df.html'; }
+        const d4 = Math.hypot(camera.position.x - GLADE4.x, camera.position.z - GLADE4.z);
+        if (!entered && d4 < 3.2) { entered = true; location.href = 'earrings.html'; }
       }
+      gem.rotation.y += dt * 1.2;                                         // the gem twirls like a dangly earring
+      gem.position.y = 3 + Math.sin(clock.elapsedTime * 1.7 + 3) * 0.25;
       axo.rotation.y = Math.atan2(camera.position.x - GLADE.x, camera.position.z - GLADE.z);  // face the player
       axo.position.y = 1.9 + Math.sin(clock.elapsedTime * 1.6) * 0.12;    // gentle bob
       for (const gl of axo.userData.gills)                                // feathery gills sway underwater

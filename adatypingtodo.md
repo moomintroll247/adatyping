@@ -1,7 +1,10 @@
 # AdaTyping — todo & station map
 
 ## Todo
-- [ ] *(add items here — this is the working list)*
+- [x] seal bark for each star *(done 5 Jul — seal.mp3 per star, seal_cheer.mp3 on graduation)*
+- [x] mark completed stations *(done 5 Jul — progress persists in localStorage; gold star crowns graduated portals in the forest)*
+- [ ] new rewards for completing a rows - new and better squishes
+- [ ] 
 
 ## Stations
 

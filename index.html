@@ -31,7 +31,7 @@
 </head>
 <body>
   <div id="dot"></div>
-  <div id="ver">forest v23</div>
+  <div id="ver">forest v24</div>
   <div id="start"><div class="ring">🌲</div></div>
 
   <script type="importmap">
@@ -374,6 +374,24 @@
     const wingL = makeWing(-1), wingR = makeWing(1);
     bfly.add(wingL); bfly.add(wingR);
     bfly.position.set(GLADE8.x, 3, GLADE8.z + 0.2); scene.add(bfly);
+    // ---- gold stars float over graduated glades (stations save rounds to localStorage) ----
+    function starMesh() {
+      const sh = new THREE.Shape();
+      for (let i = 0; i < 10; i++) {
+        const a = i * Math.PI / 5 - Math.PI / 2, rad = i % 2 ? 0.5 : 1.15;
+        const x = Math.cos(a) * rad, y = -Math.sin(a) * rad;
+        i ? sh.lineTo(x, y) : sh.moveTo(x, y);
+      }
+      sh.closePath();
+      return new THREE.Mesh(new THREE.ShapeGeometry(sh),
+        new THREE.MeshBasicMaterial({ color: 0xffd23f, side: THREE.DoubleSide }));
+    }
+    const gradStars = [];
+    [['jk', GLADE2], ['df', GLADE3], ['earrings', GLADE4], ['snail', GLADE5],
+     ['ants', GLADE6], ['wink', GLADE7], ['butterfly', GLADE8]].forEach(([k, pos]) => {
+      if (+(localStorage.getItem('ada.rounds.' + k) || 0) < 3) return;
+      const s = starMesh(); s.position.set(pos.x, 7.4, pos.z); scene.add(s); gradStars.push(s);
+    });
 
     // ---- a cute low-poly 3D axolotl, built from primitives (faces +Z) ----
     function makeAxolotl() {
@@ -634,6 +652,10 @@
       winkFace.position.y = 3 + Math.sin(clock.elapsedTime * 1.6 + 2) * 0.18;
       const fl = Math.sin(clock.elapsedTime * 5) * 0.55;                  // wings flap from the body
       wingL.rotation.y = fl; wingR.rotation.y = -fl;
+      for (let i = 0; i < gradStars.length; i++) {                        // graduation stars twirl
+        gradStars[i].rotation.y += dt * 1.5;
+        gradStars[i].position.y = 7.4 + Math.sin(clock.elapsedTime * 1.6 + i) * 0.18;
+      }
       bfly.rotation.y = Math.atan2(camera.position.x - GLADE8.x, camera.position.z - GLADE8.z);
       bfly.position.y = 3 + Math.sin(clock.elapsedTime * 2.4 + 4) * 0.3;
       axo.rotation.y = Math.atan2(camera.position.x - GLADE.x, camera.position.z - GLADE.z);  // face the player

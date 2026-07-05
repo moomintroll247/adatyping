@@ -67,7 +67,7 @@
   <main id="stage">
     <div id="deck"><div id="keycol"><div id="pips"></div><div id="key"></div></div><div id="hand"></div></div>
   </main>
-  <div id="ver">j k v13</div>
+  <div id="ver">j k v14</div>
 
   <script src="hand.js?v=5"></script>
   <script>
@@ -84,7 +84,9 @@
         b.style.setProperty('--drift',(Math.random()*20-10)+'vw'); b.style.animationDuration=(14+Math.random()*14)+'s';
         b.style.animationDelay=(-Math.random()*20)+'s'; bg.appendChild(b);} })();
 
-    let round = 0;
+    const SKEY = 'jk';                       // progress persists across visits
+    const sealBark = new Audio('assets/seal.mp3'), sealCheer = new Audio('assets/seal_cheer.mp3');
+    let round = Math.min(3, +(localStorage.getItem('ada.rounds.'+SKEY)||0));
     const ticksEl = document.getElementById('ticks');
     function drawTicks(){ ticksEl.innerHTML='';
       for(let i=0;i<3;i++){ const t=document.createElement('div'); t.className='tick'+(i<round?' done':'');
@@ -94,6 +96,7 @@
       const g=document.createElement('div'); g.id='grad'; g.innerHTML='<div id="gradcup">🏆</div>';
       document.body.appendChild(g);
       document.getElementById('toforest').classList.add('glow');
+      sealCheer.currentTime = 0; sealCheer.play().catch(()=>{});
       [0,700,1400].forEach(d=>setTimeout(()=>{ finale(); squishBurst(); }, d));
     }
     drawTicks();
@@ -133,6 +136,8 @@
       stage++;
       if(stage >= STAGES.length){
         stage = 0; round++; drawTicks();
+        localStorage.setItem('ada.rounds.'+SKEY, round);
+        sealBark.currentTime = 0; sealBark.play().catch(()=>{});   // arf! one more star
         if(round >= 3){ graduate(); return; }
         STAGES[4] = randomSeq(16);
       }

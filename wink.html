@@ -66,11 +66,23 @@
     #deck { display:flex; align-items:flex-end; gap:7vmin; }
     #keycol { display:flex; flex-direction:column; align-items:center; gap:5vmin; }
     #hand { width:34vmin; height:44vmin; }
+    #ticks { position:fixed; top:2.5vh; right:2.5vw; z-index:60; display:flex; gap:1.5vmin; }
+    .tick { width:6.5vmin; height:6.5vmin; border-radius:50%; background:rgba(255,255,255,.15);
+      border:.5vmin solid rgba(255,255,255,.5); display:flex; align-items:center; justify-content:center; font-size:4vmin; }
+    .tick.done { background:rgba(255,210,63,.3); border-color:#ffd23f; }
+    #grad { position:fixed; inset:0; z-index:55; display:flex; align-items:center; justify-content:center; pointer-events:none; }
+    #gradcup { font-size:32vmin; animation:gradpop 1s cubic-bezier(.2,1.4,.4,1), gradbob 2.2s ease-in-out 1s infinite;
+      filter:drop-shadow(0 0 6vmin rgba(255,210,63,.8)); }
+    @keyframes gradpop { 0%{transform:scale(0) rotate(-20deg)} 100%{transform:scale(1) rotate(0)} }
+    @keyframes gradbob { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-3vmin)} }
+    #toforest.glow { border-color:#ffd23f; animation:tglow 1.2s ease-in-out infinite; }
+    @keyframes tglow { 0%,100%{box-shadow:0 0 2vmin rgba(255,210,63,.5)} 50%{box-shadow:0 0 7vmin rgba(255,210,63,.95)} }
   </style>
 </head>
 <body>
   <div id="bg"></div>
   <a id="toforest" href="index.html?from=deep" aria-label="forest">🌲</a>
+  <div id="ticks"></div>
   <canvas id="squish"></canvas>
   <main id="stage">
     <div id="facewrap">
@@ -82,7 +94,7 @@
     </div>
     <div id="deck"><div id="keycol"><div id="pips"></div><div id="key">;</div></div><div id="hand"></div></div>
   </main>
-  <div id="ver">wink v4</div>
+  <div id="ver">wink v5</div>
 
   <script src="hand.js?v=4"></script>
   <script>
@@ -111,6 +123,19 @@
     function buildPips(n){ pipsEl.innerHTML=''; const sz=Math.min(5, 60/n); pipsEl.style.gap=Math.min(2, 14/n)+'vmin';
       for(let i=0;i<n;i++){ const p=document.createElement('div'); p.className='pip'; p.style.width=p.style.height=sz+'vmin'; pipsEl.appendChild(p);} }
     function markPip(i){ const p=pipsEl.children[i]; if(p){ p.classList.add('on'); p.style.background=COLS[i%COLS.length]; p.style.borderColor='rgba(255,255,255,.8)'; } }
+    let round = 0;
+    const ticksEl = document.getElementById('ticks');
+    function drawTicks(){ ticksEl.innerHTML='';
+      for(let i=0;i<3;i++){ const t=document.createElement('div'); t.className='tick'+(i<round?' done':'');
+        t.textContent=i<round?'⭐':''; ticksEl.appendChild(t); } }
+    function graduate(){                      // three rounds done — graduated from this station!
+      busy = true;
+      const g=document.createElement('div'); g.id='grad'; g.innerHTML='<div id="gradcup">🏆</div>';
+      document.body.appendChild(g);
+      document.getElementById('toforest').classList.add('glow');
+      [0,700,1400].forEach(d=>setTimeout(()=>{ chord(); squishBurst(); }, d));
+    }
+    drawTicks();
     function renderStage(){ wrap.querySelectorAll('.friend').forEach(e=>e.remove()); idx = 0; buildPips(STAGES[stage]); }
     function press(){
       const n = STAGES[stage];
@@ -129,7 +154,14 @@
       friends.forEach((f,i)=>setTimeout(()=>{ f.classList.remove('wave'); void f.offsetWidth; f.classList.add('wave'); boopHi(i); }, i*140));
       setTimeout(()=>{ face.classList.remove('wink'); void face.offsetWidth; face.classList.add('wink'); chord(); squishBurst(); }, friends.length*140+150);
     }
-    function next(){ stage = (stage + 1) % STAGES.length; renderStage(); busy = false; }
+    function next(){
+      stage++;
+      if(stage >= STAGES.length){
+        stage = 0; round++; drawTicks();
+        if(round >= 3){ graduate(); return; }
+      }
+      renderStage(); busy = false;
+    }
 
     addEventListener('keydown',(e)=>{
       if(busy || e.key.length!==1) return;

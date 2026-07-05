@@ -70,6 +70,9 @@
     .pip { border-radius:50%; background:rgba(255,255,255,.18); border:.4vmin solid rgba(255,255,255,.5); }
     .pip.on { animation:pippop .35s cubic-bezier(.2,1.5,.4,1) forwards; }
     @keyframes pippop { 0%{transform:scale(.4)} 100%{transform:scale(1)} }
+    #deck { display:flex; align-items:flex-end; gap:7vmin; }
+    #keycol { display:flex; flex-direction:column; align-items:center; gap:2.5vmin; }
+    #hand { width:34vmin; height:44vmin; }
   </style>
 </head>
 <body>
@@ -85,11 +88,9 @@
         <div id="smile"></div><div class="cheek c1"></div><div class="cheek c2"></div>
       </div>
     </div>
-    <div id="pips"></div>
-    <div id="key">s</div>
-    <div id="hand"></div>
+    <div id="deck"><div id="hand"></div><div id="keycol"><div id="pips"></div><div id="key">s</div></div></div>
   </main>
-  <div id="ver">snail v3</div>
+  <div id="ver">snail v4</div>
 
   <script src="hand.js?v=2"></script>
   <script>

@@ -24,7 +24,7 @@
     { cls: 'f-index',  x: 66,  y: 74, w: 16,   h: 94,  ang: -7, bx: 74,  by: 158 },
     { cls: 'f-middle', x: 90,  y: 60, w: 16.5, h: 108, ang: -1, bx: 98,  by: 158 },
     { cls: 'f-ring',   x: 113, y: 70, w: 15.5, h: 98,  ang: 5,  bx: 121, by: 158 },
-    { cls: 'f-pinky',  x: 134, y: 92, w: 13.5, h: 78,  ang: 13, bx: 141, by: 158 },
+    { cls: 'f-pinky',  x: 130, y: 90, w: 13.5, h: 84,  ang: 11, bx: 137, by: 158 },
   ];
 
   let cssDone = false;
@@ -88,7 +88,7 @@
     </g></g>`;
 
     // palm: wide at the knuckles, tapering gracefully into the wrist
-    const palm = `<path class="skin" d="M64 152 Q58 196 74 216 L74 240 L126 240 L126 216 Q142 196 136 152 Q100 142 64 152 Z"/>`;
+    const palm = `<path class="skin" d="M60 152 Q54 196 72 216 L72 240 L128 240 L128 216 Q146 196 144 152 Q100 141 60 152 Z"/>`;
 
     let deco = '';
     if (pattern === 'stripes') deco = [252, 264, 276].map(y =>

@@ -43,6 +43,9 @@
     .finger.tap { transform:translateY(2.5vmin) scaleY(.9); }
     .spark { position:absolute; font-size:5vmin; pointer-events:none; animation:tw 1s ease-in-out infinite; }
     @keyframes tw { 0%,100%{opacity:.2; transform:scale(.7) rotate(0)} 50%{opacity:1; transform:scale(1.2) rotate(20deg)} }
+    #deck { display:flex; align-items:flex-end; gap:7vmin; }
+    #keycol { display:flex; flex-direction:column; align-items:center; gap:2.5vmin; }
+    #hand { width:34vmin; height:44vmin; }
   </style>
 </head>
 <body>
@@ -50,11 +53,9 @@
   <a id="toforest" href="index.html?from=ring1" aria-label="forest">🌲</a>
   <canvas id="squish"></canvas>
   <main id="stage">
-    <div id="hand"></div>
-    <div id="pips"></div>
-    <div id="key"></div>
+    <div id="deck"><div id="keycol"><div id="pips"></div><div id="key"></div></div><div id="hand"></div></div>
   </main>
-  <div id="ver">j k v11</div>
+  <div id="ver">j k v12</div>
 
   <script src="hand.js?v=2"></script>
   <script>

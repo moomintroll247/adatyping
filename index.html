@@ -31,7 +31,7 @@
 </head>
 <body>
   <div id="dot"></div>
-  <div id="ver">forest v20</div>
+  <div id="ver">forest v21</div>
   <div id="start"><div class="ring">🌲</div></div>
 
   <script type="importmap">
@@ -444,13 +444,7 @@
     fox(15, -19); fox(-18, -13);
     for (let i = 0; i < 5; i++) bird((Math.random() * 2 - 1) * 20, -25 - Math.random() * 30, 6 + Math.random() * 8, 9 + Math.random() * 6, Math.random() * 6.28);
 
-    // ---- two locked gates further on (dim, not enterable yet) ----
-    function lockedGate(x, z) {
-      const m = new THREE.Mesh(new THREE.TorusGeometry(2.2, 0.3, 12, 32),
-        new THREE.MeshStandardMaterial({ color: 0x2a4a45 }));
-      m.position.set(x, 2.2, z); scene.add(m);
-    }
-    lockedGate(-16, -56); lockedGate(16, -56);   // moved deeper: Arc 1 now lives where they used to tease
+    // (locked teaser gates removed — real portals arrive with each new arc instead)
 
     // ---- first-person controls ----
     const controls = new PointerLockControls(camera, renderer.domElement);

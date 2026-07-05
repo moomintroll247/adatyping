@@ -18,12 +18,13 @@
   const POLISH = ['#ff6b9d', '#a78bfa', '#2dd4bf', '#ff924c', '#f43f5e', '#ffd23f'];
   const BEADS  = ['#ff6b9d', '#ffd23f', '#2dd4bf', '#a78bfa', '#ff924c'];
 
-  // finger geometry (viewBox 0 0 200 240) — index..pinky left to right
+  // finger geometry (viewBox 0 0 200 300) — slim, gently fanned; ang = splay,
+  // (bx,by) = knuckle pivot the splay rotates around
   const F = [
-    { cls: 'f-index',  x: 50,  y: 52, w: 25, h: 95 },
-    { cls: 'f-middle', x: 79,  y: 34, w: 25, h: 113 },
-    { cls: 'f-ring',   x: 108, y: 48, w: 25, h: 99 },
-    { cls: 'f-pinky',  x: 137, y: 72, w: 21, h: 75 },
+    { cls: 'f-index',  x: 66,  y: 74, w: 16,   h: 94,  ang: -7, bx: 74,  by: 158 },
+    { cls: 'f-middle', x: 90,  y: 60, w: 16.5, h: 108, ang: -1, bx: 98,  by: 158 },
+    { cls: 'f-ring',   x: 113, y: 70, w: 15.5, h: 98,  ang: 5,  bx: 121, by: 158 },
+    { cls: 'f-pinky',  x: 134, y: 92, w: 13.5, h: 78,  ang: 13, bx: 141, by: 158 },
   ];
 
   let cssDone = false;
@@ -68,49 +69,47 @@
 
     const fingers = F.map(f => {
       const cx = f.x + f.w / 2;
-      const nail = `<ellipse class="nail" cx="${cx}" cy="${f.y + f.w * 0.62}" rx="${f.w * 0.3}" ry="${f.w * 0.36}"
+      const nail = `<ellipse class="nail" cx="${cx}" cy="${f.y + f.w * 0.6}" rx="${f.w * 0.28}" ry="${f.w * 0.34}"
         fill="${polish || NAIL}"/>` +
-        (polish ? `<circle cx="${cx - f.w * 0.14}" cy="${f.y + f.w * 0.48}" r="1.8" fill="rgba(255,255,255,.85)"/>` : '');
+        (polish ? `<circle cx="${cx - f.w * 0.13}" cy="${f.y + f.w * 0.46}" r="1.4" fill="rgba(255,255,255,.85)"/>` : '');
       const band = ringOn === f.cls
-        ? `<rect x="${f.x - 1.5}" y="${f.y + f.h * 0.56}" width="${f.w + 3}" height="9" rx="4.5" fill="#ffd23f"/>
-           <circle cx="${cx}" cy="${f.y + f.h * 0.56}" r="4" fill="#ff6b9d"/>
-           <circle cx="${cx - 1.3}" cy="${f.y + f.h * 0.56 - 1.3}" r="1.1" fill="rgba(255,255,255,.9)"/>`
+        ? `<rect x="${f.x - 1.2}" y="${f.y + f.h * 0.52}" width="${f.w + 2.4}" height="7" rx="3.5" fill="#ffd23f"/>
+           <circle cx="${cx}" cy="${f.y + f.h * 0.52}" r="3.2" fill="#ff6b9d"/>
+           <circle cx="${cx - 1}" cy="${f.y + f.h * 0.52 - 1}" r="0.9" fill="rgba(255,255,255,.9)"/>`
         : '';
-      return `<g class="finger ${f.cls}">
+      // outer g owns the splay (attribute transform); inner g takes the CSS glow/tap
+      return `<g transform="rotate(${f.ang} ${f.bx} ${f.by})"><g class="finger ${f.cls}">
         <rect class="skin" x="${f.x}" y="${f.y}" width="${f.w}" height="${f.h}" rx="${f.w / 2}"/>
-        ${nail}${band}</g>`;
+        ${nail}${band}</g></g>`;
     }).join('');
 
-    const thumb = `<g class="finger thumb">
-      <rect class="skin" x="34" y="112" width="24" height="72" rx="12" transform="rotate(-32 46 184)"/>
-    </g>`;
+    const thumb = `<g transform="rotate(-40 70 208)"><g class="finger thumb">
+      <rect class="skin" x="62" y="136" width="16" height="76" rx="8"/>
+    </g></g>`;
 
-    // knuckle dimples — three tiny arcs along the top of the palm
-    const dimples = [76, 104, 132].map(x =>
-      `<path d="M${x - 6} 141 q6 -5 12 0" stroke="${shade(SKIN, -28)}" stroke-width="2.4" fill="none" stroke-linecap="round"/>`
-    ).join('');
+    // palm: wide at the knuckles, tapering gracefully into the wrist
+    const palm = `<path class="skin" d="M64 152 Q58 196 74 216 L74 240 L126 240 L126 216 Q142 196 136 152 Q100 142 64 152 Z"/>`;
 
     let deco = '';
-    if (pattern === 'stripes') deco = [208, 220, 232].map(y =>
-      `<rect x="56" y="${y}" width="92" height="5" rx="2.5" fill="${cuffLite}"/>`).join('');
-    else if (pattern === 'dots') deco = [66, 88, 110, 132].map((x, i) =>
-      `<circle cx="${x}" cy="${i % 2 ? 226 : 214}" r="4.5" fill="${cuffLite}"/>`).join('');
+    if (pattern === 'stripes') deco = [252, 264, 276].map(y =>
+      `<rect x="72" y="${y}" width="56" height="4" rx="2" fill="${cuffLite}"/>`).join('');
+    else if (pattern === 'dots') deco = [80, 100, 120].map((x, i) =>
+      `<circle cx="${x}" cy="${i % 2 ? 272 : 258}" r="3.6" fill="${cuffLite}"/>`).join('');
     else if (pattern === 'wave') deco =
-      `<path d="M58 216 q11 -8 23 0 t23 0 t23 0 t20 0" stroke="${cuffLite}" stroke-width="4" fill="none" stroke-linecap="round"/>
-       <path d="M58 228 q11 -8 23 0 t23 0 t23 0 t20 0" stroke="${cuffLite}" stroke-width="4" fill="none" stroke-linecap="round"/>`;
+      `<path d="M74 256 q8 -6 17 0 t17 0 t18 0" stroke="${cuffLite}" stroke-width="3.5" fill="none" stroke-linecap="round"/>
+       <path d="M74 270 q8 -6 17 0 t17 0 t18 0" stroke="${cuffLite}" stroke-width="3.5" fill="none" stroke-linecap="round"/>`;
 
     const beads = bracelet
-      ? Array.from({ length: 8 }, (_, i) =>
-        `<circle cx="${56 + i * 13}" cy="200" r="5" fill="${BEADS[i % BEADS.length]}"/>`).join('')
+      ? Array.from({ length: 7 }, (_, i) =>
+        `<circle cx="${76 + i * 8}" cy="237" r="4" fill="${BEADS[i % BEADS.length]}"/>`).join('')
       : '';
 
-    el.innerHTML = `<svg class="svghand" viewBox="0 0 200 244" preserveAspectRatio="xMidYMax meet" aria-hidden="true">
+    el.innerHTML = `<svg class="svghand" viewBox="0 0 200 300" preserveAspectRatio="xMidYMax meet" aria-hidden="true">
       ${thumb}${fingers}
-      <rect class="skin" x="46" y="128" width="112" height="82" rx="26"/>
-      ${dimples}
+      ${palm}
       <g class="cuff">
-        <rect x="52" y="202" width="100" height="42" rx="14" fill="${cuff}"/>
-        <rect x="52" y="202" width="100" height="10" rx="5" fill="${shade(cuff, -25)}"/>
+        <rect x="66" y="238" width="68" height="58" rx="12" fill="${cuff}"/>
+        <rect x="66" y="238" width="68" height="9" rx="4.5" fill="${shade(cuff, -25)}"/>
         ${deco}
       </g>
       ${beads}

@@ -31,7 +31,7 @@
 </head>
 <body>
   <div id="dot"></div>
-  <div id="ver">forest v25</div>
+  <div id="ver">forest v26</div>
   <div id="start"><div class="ring">🌲</div></div>
 
   <script type="importmap">
@@ -449,38 +449,122 @@
       p.position.set(pos.x, 3, pos.z); scene.add(p);
     }
     let bowG = null, juggleG = null, girG = null, tightG = null;
+    const eyeDk = new THREE.MeshStandardMaterial({ color: 0x2a1133 });
+    const eyeWh = new THREE.MeshStandardMaterial({ color: 0xffffff });
+    function eyes(g, x, y, z, r = 0.09) {          // a pair of shiny eyes on the +Z face
+      for (const s of [-1, 1]) {
+        const e = new THREE.Mesh(new THREE.SphereGeometry(r, 10, 8), eyeDk);
+        e.position.set(s * x, y, z); g.add(e);
+        const h = new THREE.Mesh(new THREE.SphereGeometry(r * 0.35, 6, 6), eyeWh);
+        h.position.set(s * x + r * 0.3, y + r * 0.35, z + r * 0.8); g.add(h);
+      }
+    }
     if (arcOpen) {                                 // greeters only appear once the gate opens
-      bowG = new THREE.Group();                    // hair-braider bow
-      const bowMat = new THREE.MeshStandardMaterial({ color: 0xff6b9d, roughness: .6 });
-      const c1 = new THREE.Mesh(new THREE.ConeGeometry(0.7, 1.6, 10), bowMat);
-      c1.rotation.z = Math.PI / 2; c1.position.x = -0.85; bowG.add(c1);
-      const c2 = new THREE.Mesh(new THREE.ConeGeometry(0.7, 1.6, 10), bowMat);
-      c2.rotation.z = -Math.PI / 2; c2.position.x = 0.85; bowG.add(c2);
-      bowG.add(new THREE.Mesh(new THREE.SphereGeometry(0.4, 12, 10), new THREE.MeshStandardMaterial({ color: 0xff9ec4 })));
-      bowG.position.set(GLADE9.x, 3, GLADE9.z + 0.2); scene.add(bowG);
-      juggleG = new THREE.Group();                 // fox's juggling balls, orbiting
-      [0xffd23f, 0x2dd4bf, 0xa78bfa, 0xff6b9d].forEach((c, i) => {
-        const b = new THREE.Mesh(new THREE.SphereGeometry(0.45, 12, 10), new THREE.MeshStandardMaterial({ color: c, roughness: .5 }));
-        const a = i / 4 * Math.PI * 2; b.position.set(Math.cos(a) * 1.3, Math.sin(a) * 1.3, 0); juggleG.add(b);
+      // --- hair braider: a little unicorn with a braided rainbow mane ---
+      bowG = new THREE.Group();
+      const uniM = new THREE.MeshStandardMaterial({ color: 0xfdf6ec, roughness: .85 });
+      const uhead = new THREE.Mesh(new THREE.SphereGeometry(0.75, 18, 14), uniM);
+      uhead.scale.set(1.05, 0.95, 0.9); bowG.add(uhead);
+      const usnout = new THREE.Mesh(new THREE.SphereGeometry(0.4, 14, 10), new THREE.MeshStandardMaterial({ color: 0xf9dfd0, roughness: .85 }));
+      usnout.position.set(0, -0.28, 0.5); bowG.add(usnout);
+      const horn = new THREE.Mesh(new THREE.ConeGeometry(0.15, 0.85, 8),
+        new THREE.MeshStandardMaterial({ color: 0xffd23f, metalness: .5, roughness: .3 }));
+      horn.position.set(0, 1.05, 0.1); bowG.add(horn);
+      for (const s of [-1, 1]) {
+        const ear = new THREE.Mesh(new THREE.ConeGeometry(0.16, 0.4, 8), uniM);
+        ear.position.set(s * 0.42, 0.78, -0.05); ear.rotation.z = -s * 0.3; bowG.add(ear);
+        const bl = new THREE.Mesh(new THREE.SphereGeometry(0.11, 8, 6), new THREE.MeshStandardMaterial({ color: 0xff9ec4 }));
+        bl.position.set(s * 0.48, -0.12, 0.5); bl.scale.y = 0.6; bowG.add(bl);
+      }
+      eyes(bowG, 0.32, 0.12, 0.6);
+      [0xff6b9d, 0xa78bfa, 0x2dd4bf, 0xffd23f].forEach((c, i) => {   // the braid, swinging beside the face
+        const bead = new THREE.Mesh(new THREE.SphereGeometry(0.2 - i * 0.02, 10, 8),
+          new THREE.MeshStandardMaterial({ color: c, roughness: .6 }));
+        bead.position.set(0.68 + (i % 2 ? 0.08 : -0.02), 0.32 - i * 0.32, 0.15); bowG.add(bead);
       });
+      bowG.position.set(GLADE9.x, 3, GLADE9.z + 0.2); scene.add(bowG);
+      // --- juggling fox: fox face with his four balls orbiting ---
+      juggleG = new THREE.Group();
+      const foxM = new THREE.MeshStandardMaterial({ color: 0xfb8b3c, roughness: .8 });
+      const fhead = new THREE.Mesh(new THREE.SphereGeometry(0.7, 18, 14), foxM);
+      fhead.scale.set(1.05, 0.9, 0.9); juggleG.add(fhead);
+      const fsnout = new THREE.Mesh(new THREE.SphereGeometry(0.34, 12, 10), eyeWh);
+      fsnout.position.set(0, -0.22, 0.5); juggleG.add(fsnout);
+      const fnose = new THREE.Mesh(new THREE.SphereGeometry(0.1, 8, 6), eyeDk);
+      fnose.position.set(0, -0.14, 0.8); juggleG.add(fnose);
+      for (const s of [-1, 1]) {
+        const ear = new THREE.Mesh(new THREE.ConeGeometry(0.24, 0.55, 8), foxM);
+        ear.position.set(s * 0.45, 0.68, -0.05); ear.rotation.z = -s * 0.25; juggleG.add(ear);
+      }
+      eyes(juggleG, 0.28, 0.12, 0.56, 0.08);
+      const balls = new THREE.Group();
+      [0xffd23f, 0x2dd4bf, 0xa78bfa, 0xff6b9d].forEach((c, i) => {
+        const b = new THREE.Mesh(new THREE.SphereGeometry(0.26, 12, 10), new THREE.MeshStandardMaterial({ color: c, roughness: .5 }));
+        const a = i / 4 * Math.PI * 2; b.position.set(Math.cos(a) * 1.35, Math.sin(a) * 1.35, 0.1); balls.add(b);
+      });
+      juggleG.add(balls); juggleG.userData.balls = balls;
       juggleG.position.set(GLADE10.x, 3, GLADE10.z + 0.2); scene.add(juggleG);
-      girG = new THREE.Group();                    // mini giraffe, neck stretched
-      const girMat = new THREE.MeshStandardMaterial({ color: 0xeab308, roughness: .8 });
-      const neck = new THREE.Mesh(new THREE.CylinderGeometry(0.22, 0.28, 2.4, 10), girMat);
-      neck.rotation.z = 0.35; neck.position.set(-0.35, 0, 0); girG.add(neck);
-      const ghead = new THREE.Mesh(new THREE.SphereGeometry(0.42, 14, 10), girMat);
-      ghead.position.set(-0.85, 1.25, 0); ghead.scale.set(1.25, 0.9, 0.9); girG.add(ghead);
-      const dkm = new THREE.MeshStandardMaterial({ color: 0x7a5230 });
-      for (const s of [-0.16, 0.16]) { const h = new THREE.Mesh(new THREE.CylinderGeometry(0.05, 0.05, 0.4, 6), dkm);
-        h.position.set(-0.8 + s, 1.65, s); girG.add(h); }
-      girG.position.set(GLADE11.x, 2.6, GLADE11.z + 0.2); scene.add(girG);
-      tightG = new THREE.Group();                  // elephant balancing in a tutu
-      const tutu = new THREE.Mesh(new THREE.ConeGeometry(1.0, 0.7, 16), new THREE.MeshStandardMaterial({ color: 0xff9ec4, roughness: .7 }));
-      tutu.rotation.x = Math.PI; tightG.add(tutu);
-      const ball = new THREE.Mesh(new THREE.SphereGeometry(0.65, 14, 12), new THREE.MeshStandardMaterial({ color: 0x9aa0a6, roughness: .8 }));
-      ball.position.y = 0.75; tightG.add(ball);
-      const trunk = new THREE.Mesh(new THREE.CylinderGeometry(0.09, 0.12, 0.7, 8), new THREE.MeshStandardMaterial({ color: 0x9aa0a6 }));
-      trunk.position.set(0, 0.55, 0.75); trunk.rotation.x = 0.8; tightG.add(trunk);
+      // --- a whole little giraffe: body, legs, long neck, ossicones, spots ---
+      girG = new THREE.Group();
+      const girM = new THREE.MeshStandardMaterial({ color: 0xeab308, roughness: .8 });
+      const spotM = new THREE.MeshStandardMaterial({ color: 0xb45309, roughness: .8 });
+      const gbody = new THREE.Mesh(new THREE.CapsuleGeometry(0.36, 0.7, 6, 12), girM);
+      gbody.rotation.z = Math.PI / 2; gbody.position.set(0.15, -0.55, 0); girG.add(gbody);
+      for (const [lx, lz] of [[-0.2, 0.18], [0.5, 0.18], [-0.2, -0.18], [0.5, -0.18]]) {
+        const leg = new THREE.Mesh(new THREE.CylinderGeometry(0.08, 0.07, 0.55, 8), girM);
+        leg.position.set(lx, -1.05, lz); girG.add(leg);
+      }
+      const gneck = new THREE.Mesh(new THREE.CylinderGeometry(0.15, 0.22, 1.7, 10), girM);
+      gneck.rotation.z = 0.3; gneck.position.set(-0.45, 0.2, 0); girG.add(gneck);
+      const ghead2 = new THREE.Mesh(new THREE.SphereGeometry(0.3, 14, 10), girM);
+      ghead2.position.set(-0.72, 1.05, 0); ghead2.scale.set(1.35, 0.85, 0.85); girG.add(ghead2);
+      const gsnout = new THREE.Mesh(new THREE.SphereGeometry(0.16, 10, 8), new THREE.MeshStandardMaterial({ color: 0xfde68a, roughness: .8 }));
+      gsnout.position.set(-1.0, 1.0, 0); girG.add(gsnout);
+      for (const s of [-1, 1]) {
+        const oss = new THREE.Mesh(new THREE.CylinderGeometry(0.035, 0.035, 0.28, 6), girM);
+        oss.position.set(-0.66 + s * 0.09, 1.36, s * 0.06); girG.add(oss);
+        const bob = new THREE.Mesh(new THREE.SphereGeometry(0.06, 8, 6), spotM);
+        bob.position.set(-0.66 + s * 0.09, 1.5, s * 0.06); girG.add(bob);
+        const ear = new THREE.Mesh(new THREE.SphereGeometry(0.11, 8, 6), girM);
+        ear.position.set(-0.6, 1.24, s * 0.24); ear.scale.set(1, 0.6, 0.4); girG.add(ear);
+      }
+      for (const s of [-1, 1]) {                   // eyes sit either side of the little head
+        const e = new THREE.Mesh(new THREE.SphereGeometry(0.07, 8, 6), eyeDk);
+        e.position.set(-0.8, 1.16, s * 0.18); girG.add(e);
+        const h = new THREE.Mesh(new THREE.SphereGeometry(0.025, 6, 6), eyeWh);
+        h.position.set(-0.84, 1.19, s * 0.21); girG.add(h);
+      }
+      [[-0.5, 0.5, 0.13], [-0.32, -0.05, 0.18], [0.1, -0.4, 0.3], [0.45, -0.6, 0.28]].forEach(([sx, sy, sz]) => {
+        const sp = new THREE.Mesh(new THREE.SphereGeometry(0.09, 8, 6), spotM);
+        sp.position.set(sx, sy, sz); sp.scale.z = 0.4; girG.add(sp);
+      });
+      girG.position.set(GLADE11.x, 3.1, GLADE11.z + 0.2); scene.add(girG);
+      // --- tightrope: a chibi elephant in a REAL tutu, balancing on a rope ---
+      tightG = new THREE.Group();
+      const eleM = new THREE.MeshStandardMaterial({ color: 0x9fa6ad, roughness: .8 });
+      const ehead = new THREE.Mesh(new THREE.SphereGeometry(0.68, 18, 14), eleM);
+      ehead.position.y = 0.3; tightG.add(ehead);
+      for (const s of [-1, 1]) {
+        const ear = new THREE.Mesh(new THREE.SphereGeometry(0.42, 14, 10), eleM);
+        ear.position.set(s * 0.66, 0.42, -0.08); ear.scale.set(0.9, 1.05, 0.25); tightG.add(ear);
+        const inner = new THREE.Mesh(new THREE.SphereGeometry(0.26, 10, 8), new THREE.MeshStandardMaterial({ color: 0xffb9d0, roughness: .8 }));
+        inner.position.set(s * 0.62, 0.42, 0.03); inner.scale.set(0.85, 1, 0.2); tightG.add(inner);
+      }
+      [[0, 0.02, 0.6, 0.17], [0.02, -0.2, 0.7, 0.14], [0.1, -0.38, 0.74, 0.11]].forEach(([tx, ty, tz, tr]) => {
+        const seg = new THREE.Mesh(new THREE.SphereGeometry(tr, 10, 8), eleM);
+        seg.position.set(tx, ty, tz); tightG.add(seg);
+      });
+      eyes(tightG, 0.26, 0.44, 0.56, 0.08);
+      const tutu2 = new THREE.Mesh(new THREE.TorusGeometry(0.52, 0.24, 10, 22),
+        new THREE.MeshStandardMaterial({ color: 0xff9ec4, roughness: .7 }));
+      tutu2.rotation.x = Math.PI / 2; tutu2.position.y = -0.42; tutu2.scale.z = 0.55; tightG.add(tutu2);
+      for (const s of [-1, 1]) {
+        const leg = new THREE.Mesh(new THREE.CylinderGeometry(0.13, 0.15, 0.4, 8), eleM);
+        leg.position.set(s * 0.22, -0.75, 0); tightG.add(leg);
+      }
+      const rope = new THREE.Mesh(new THREE.CylinderGeometry(0.035, 0.035, 3.4, 6),
+        new THREE.MeshStandardMaterial({ color: 0xf5f0e6, roughness: .6 }));
+      rope.rotation.z = Math.PI / 2; rope.position.y = -0.98; tightG.add(rope);
       tightG.position.set(GLADE12.x, 3, GLADE12.z + 0.2); scene.add(tightG);
     }
 
@@ -757,11 +841,15 @@
         gradStars[i].rotation.y += dt * 1.5;
         gradStars[i].position.y = 7.4 + Math.sin(clock.elapsedTime * 1.6 + i) * 0.18;
       }
-      if (bowG) { bowG.rotation.y += dt * 1.1; bowG.position.y = 3 + Math.sin(clock.elapsedTime * 1.5 + 1) * 0.2; }
-      if (juggleG) { juggleG.rotation.z += dt * 1.8; juggleG.position.y = 3 + Math.sin(clock.elapsedTime * 1.7 + 2) * 0.2; }
+      if (bowG) { bowG.rotation.y = Math.atan2(camera.position.x - GLADE9.x, camera.position.z - GLADE9.z);
+        bowG.position.y = 3 + Math.sin(clock.elapsedTime * 1.5 + 1) * 0.2; }
+      if (juggleG) { juggleG.rotation.y = Math.atan2(camera.position.x - GLADE10.x, camera.position.z - GLADE10.z);
+        juggleG.userData.balls.rotation.z += dt * 1.6;                    // the balls cascade around him
+        juggleG.position.y = 3 + Math.sin(clock.elapsedTime * 1.7 + 2) * 0.2; }
       if (girG) { girG.rotation.y = Math.atan2(camera.position.x - GLADE11.x, camera.position.z - GLADE11.z);
-        girG.position.y = 2.6 + Math.sin(clock.elapsedTime * 1.4 + 3) * 0.18; }
-      if (tightG) { tightG.rotation.y += dt * 0.9; tightG.position.y = 3 + Math.sin(clock.elapsedTime * 1.6 + 4) * 0.2; }
+        girG.position.y = 3.1 + Math.sin(clock.elapsedTime * 1.4 + 3) * 0.18; }
+      if (tightG) { tightG.rotation.y = Math.atan2(camera.position.x - GLADE12.x, camera.position.z - GLADE12.z);
+        tightG.position.y = 3 + Math.sin(clock.elapsedTime * 1.6 + 4) * 0.2; }
       bfly.rotation.y = Math.atan2(camera.position.x - GLADE8.x, camera.position.z - GLADE8.z);
       bfly.position.y = 3 + Math.sin(clock.elapsedTime * 2.4 + 4) * 0.3;
       axo.rotation.y = Math.atan2(camera.position.x - GLADE.x, camera.position.z - GLADE.z);  // face the player

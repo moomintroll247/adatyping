@@ -8,6 +8,8 @@
   - [x] new squishies — Arc 2 celebrates with spinning STARS & HEARTS, bouncier physics
   - [x] new tones — Arc 2 uses a warm marimba on a pentatonic scale (different per station)
 - [x] Arc 2 built past the gate *(done 5 Jul — braid, juggle, giraffe, tightrope at z -58..-66)*
+- [x] Improve the greeters in Arc 2 *(done 5 Jul — unicorn with rainbow braid, juggling fox with orbiting balls, full giraffe with spots/ossicones, chibi elephant in a tutu on a rope)*
+- [x] Pink semicircle behind the elephant — gone *(was a CSS tutu blob in tightrope.html; removed 5 Jul)*
 
 ## Parent controls (don't tell Ada)
 

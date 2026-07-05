@@ -26,8 +26,6 @@
     .plat { position:absolute; top:12.2vh; width:9vmin; height:3vmin; border-radius:1vmin; background:#7a5230; }
     .plat.p1 { left:0; } .plat.p2 { right:0; }
     #ele { position:absolute; top:2.5vh; left:6%; font-size:12vmin; line-height:1; transition:left .3s cubic-bezier(.3,1.1,.5,1); }
-    #tutu { position:absolute; bottom:1.4vmin; left:50%; transform:translateX(-50%); width:11vmin; height:4.6vmin;
-      background:radial-gradient(ellipse at 50% 0%, #ff9ec4, #ff6b9d); border-radius:0 0 6vmin 6vmin; z-index:-1; }
     #ele.wob { animation:wob .4s ease-in-out; }
     @keyframes wob { 0%,100%{transform:rotate(0)} 30%{transform:rotate(-8deg)} 70%{transform:rotate(6deg)} }
     .rose { position:absolute; top:-6vh; font-size:5.5vmin; animation:rosefall 2.4s ease-in forwards; }
@@ -69,7 +67,7 @@
   <div id="wirebox">
     <div class="plat p1"></div><div class="plat p2"></div>
     <div id="wire"></div>
-    <div id="ele">🐘<div id="tutu"></div></div>
+    <div id="ele">🐘</div>
   </div>
   <main id="stage">
     <div id="pips"></div>
@@ -78,7 +76,7 @@
       <div class="kcol"><div class="bigkey" id="kr">j</div><div class="hand" id="hr"></div></div>
     </div>
   </main>
-  <div id="ver">tightrope v1</div>
+  <div id="ver">tightrope v2</div>
 
   <script src="hand.js?v=5"></script>
   <script>

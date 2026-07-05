@@ -66,10 +66,11 @@
     const camera = new THREE.PerspectiveCamera(72, innerWidth / innerHeight, 0.1, 200);
     camera.position.set(0, 1.6, 8);
     camera.lookAt(GLADE.x, 1.6, GLADE.z);          // start facing the glade
-    // Checkpoint spawn: coming back from a deep station (?from=deep) drops you PAST the
-    // first ring of glades, already facing the Arc-1 clearing — progress you can feel,
-    // and no long walk back. Exiting the first three glades still starts at the start.
-    if (new URLSearchParams(location.search).get('from') === 'deep') {
+    // Coming back from a station (?from=...): skip the entry gate and spawn straight in.
+    // ?from=deep also drops you PAST the first ring, facing the Arc-1 clearing —
+    // progress you can feel, and no long walk back.
+    const FROM = new URLSearchParams(location.search).get('from');
+    if (FROM === 'deep') {
       camera.position.set(0, 1.6, -21);
       camera.lookAt(0, 1.6, -32);
     }
@@ -449,14 +450,20 @@
         new THREE.MeshStandardMaterial({ color: 0x2a4a45 }));
       m.position.set(x, 2.2, z); scene.add(m);
     }
-    lockedGate(-16, -34); lockedGate(16, -34);
+    lockedGate(-16, -56); lockedGate(16, -56);   // moved deeper: Arc 1 now lives where they used to tease
 
     // ---- first-person controls ----
     const controls = new PointerLockControls(camera, renderer.domElement);
     const startEl = document.getElementById('start'), dot = document.getElementById('dot');
     startEl.addEventListener('click', () => controls.lock());
     controls.addEventListener('lock',   () => { startEl.style.display = 'none'; dot.style.display = 'block'; });
-    controls.addEventListener('unlock', () => { startEl.style.display = 'flex'; dot.style.display = 'none'; });
+    controls.addEventListener('unlock', () => { if (FROM) return; startEl.style.display = 'flex'; dot.style.display = 'none'; });
+    if (FROM) {
+      // back from a station: no gate — world is live immediately, keys walk right away;
+      // the browser needs one click before it hands over the mouse for looking around
+      startEl.style.display = 'none'; dot.style.display = 'block';
+      renderer.domElement.addEventListener('click', () => { if (!controls.isLocked) controls.lock(); });
+    }
 
     const keys = {};
     addEventListener('keydown', e => keys[e.code] = true);
@@ -472,7 +479,7 @@
     function animate() {
       requestAnimationFrame(animate);
       const dt = Math.min(clock.getDelta(), 0.1);
-      if (controls.isLocked) {
+      if (controls.isLocked || FROM) {
         const v = 7 * dt;
         if (keys.KeyW || keys.ArrowUp)    controls.moveForward(v);
         if (keys.KeyS || keys.ArrowDown)  controls.moveForward(-v);

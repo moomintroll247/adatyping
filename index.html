@@ -31,7 +31,7 @@
 </head>
 <body>
   <div id="dot"></div>
-  <div id="ver">forest v21</div>
+  <div id="ver">forest v22</div>
   <div id="start"><div class="ring">🌲</div></div>
 
   <script type="importmap">
@@ -209,14 +209,51 @@
       new THREE.MeshStandardMaterial({ color: 0xff8fc0, emissive: 0xff6b9d, emissiveIntensity: .45, roughness: .15, metalness: .6, flatShading: true })
     );
     gem.position.set(GLADE4.x, 3, GLADE4.z + 0.2); scene.add(gem);
-    // glade 5 portal (lilac — the snail spa) + a spiral-shell swirl
+    // glade 5 portal (lilac — the snail spa) + a proper little snail, side-on
     const portal5 = new THREE.Mesh(new THREE.TorusGeometry(3.2, 0.5, 16, 48), new THREE.MeshBasicMaterial({ color: 0xa78bfa }));
     portal5.position.set(GLADE5.x, 3, GLADE5.z); scene.add(portal5);
-    const swirl = new THREE.Mesh(
-      new THREE.TorusGeometry(0.9, 0.38, 12, 32),
-      new THREE.MeshStandardMaterial({ color: 0xe8c79b, roughness: .6 })
-    );
-    swirl.position.set(GLADE5.x, 3, GLADE5.z + 0.2); scene.add(swirl);
+    function makeLilSnail() {
+      const g = new THREE.Group();
+      const cream = new THREE.MeshStandardMaterial({ color: 0xffe3b8, roughness: .85 });
+      const dark  = new THREE.MeshStandardMaterial({ color: 0x2a1133 });
+      const white = new THREE.MeshStandardMaterial({ color: 0xffffff });
+      // body: a soft foot lying along X, head rising at the front
+      const body = new THREE.Mesh(new THREE.CapsuleGeometry(0.3, 1.5, 6, 14), cream);
+      body.rotation.z = Math.PI / 2; body.position.set(0.15, 0.3, 0); body.scale.y = 0.8; g.add(body);
+      const head = new THREE.Mesh(new THREE.SphereGeometry(0.32, 16, 12), cream);
+      head.position.set(1.05, 0.62, 0); g.add(head);
+      // eye stalks with big friendly eyes
+      const stalks = [];
+      [[0.35, 0.88], [-0.35, 1.2]].forEach(([tilt, x]) => {   // tops lean APART, eyes well separated
+        const st = new THREE.Group();
+        const stem = new THREE.Mesh(new THREE.CylinderGeometry(0.045, 0.055, 0.55, 8), cream);
+        stem.position.y = 0.27; st.add(stem);
+        const eye = new THREE.Mesh(new THREE.SphereGeometry(0.14, 12, 10), dark);
+        eye.position.y = 0.58; st.add(eye);
+        const hi = new THREE.Mesh(new THREE.SphereGeometry(0.05, 8, 6), white);
+        hi.position.set(0.04, 0.62, 0.1); st.add(hi);
+        st.position.set(x, 0.78, 0); st.rotation.z = tilt;
+        st.userData.baseZ = st.rotation.z; stalks.push(st); g.add(st);
+      });
+      // smile + blush on the player-facing side
+      const smile = new THREE.Mesh(new THREE.TorusGeometry(0.09, 0.022, 8, 16, Math.PI), dark);
+      smile.position.set(1.16, 0.46, 0.24); smile.rotation.z = Math.PI; g.add(smile);
+      const blush = new THREE.Mesh(new THREE.SphereGeometry(0.06, 8, 6), new THREE.MeshStandardMaterial({ color: 0xff9ec4 }));
+      blush.position.set(0.92, 0.55, 0.26); blush.scale.y = 0.6; g.add(blush);
+      // the shell: a flattened dome with a real winding spiral of shrinking tori
+      const shellBack = new THREE.Mesh(new THREE.SphereGeometry(0.62, 18, 14), new THREE.MeshStandardMaterial({ color: 0xdbb27f, roughness: .7 }));
+      shellBack.scale.z = 0.5; shellBack.position.set(-0.35, 0.85, 0); g.add(shellBack);
+      [[0.5, 0.15, 0xcfa06a, 0.06], [0.3, 0.12, 0xe8c79b, 0.2], [0.14, 0.09, 0xa9764a, 0.32]].forEach(([r, tube, col, zoff]) => {
+        const ring = new THREE.Mesh(new THREE.TorusGeometry(r, tube, 10, 28),
+          new THREE.MeshStandardMaterial({ color: col, roughness: .7 }));
+        ring.position.set(-0.35 + zoff * 0.3, 0.85 - zoff * 0.15, zoff); g.add(ring);
+      });
+      g.userData.stalks = stalks;
+      return g;
+    }
+    const lilSnail = makeLilSnail();
+    lilSnail.scale.setScalar(1.15);
+    lilSnail.position.set(GLADE5.x, 2.1, GLADE5.z + 0.2); scene.add(lilSnail);
     // glade 6 portal (green — the ant parade) + three little ants in a row
     const portal6 = new THREE.Mesh(new THREE.TorusGeometry(3.2, 0.5, 16, 48), new THREE.MeshBasicMaterial({ color: 0x4ade80 }));
     portal6.position.set(GLADE6.x, 3, GLADE6.z); scene.add(portal6);
@@ -501,8 +538,10 @@
       }
       gem.rotation.y += dt * 1.2;                                         // the gem twirls like a dangly earring
       gem.position.y = 3 + Math.sin(clock.elapsedTime * 1.7 + 3) * 0.25;
-      swirl.rotation.z += dt * 0.8;                                       // shell swirl spins lazily
-      swirl.position.y = 3 + Math.sin(clock.elapsedTime * 1.4 + 1) * 0.2;
+      lilSnail.rotation.y = Math.atan2(camera.position.x - GLADE5.x, camera.position.z - GLADE5.z);  // show its side
+      lilSnail.position.y = 2.1 + Math.sin(clock.elapsedTime * 1.4 + 1) * 0.18;
+      for (const st of lilSnail.userData.stalks)                          // eye stalks waggle gently
+        st.rotation.z = st.userData.baseZ + Math.sin(clock.elapsedTime * 2.1 + st.userData.baseZ * 9) * 0.1;
       antRow.position.y = 2.6 + Math.sin(clock.elapsedTime * 2.2) * 0.15; // ants bob along
       antRow.rotation.y = Math.atan2(camera.position.x - GLADE6.x, camera.position.z - GLADE6.z) + Math.PI / 2;
       winkFace.rotation.y = Math.atan2(camera.position.x - GLADE7.x, camera.position.z - GLADE7.z);  // face the player

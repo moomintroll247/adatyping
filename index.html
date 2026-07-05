@@ -66,6 +66,13 @@
     const camera = new THREE.PerspectiveCamera(72, innerWidth / innerHeight, 0.1, 200);
     camera.position.set(0, 1.6, 8);
     camera.lookAt(GLADE.x, 1.6, GLADE.z);          // start facing the glade
+    // Checkpoint spawn: coming back from a deep station (?from=deep) drops you PAST the
+    // first ring of glades, already facing the Arc-1 clearing — progress you can feel,
+    // and no long walk back. Exiting the first three glades still starts at the start.
+    if (new URLSearchParams(location.search).get('from') === 'deep') {
+      camera.position.set(0, 1.6, -21);
+      camera.lookAt(0, 1.6, -32);
+    }
     scene.add(camera);
 
     scene.add(new THREE.HemisphereLight(0xddffff, 0x3a7a4a, 1.1));

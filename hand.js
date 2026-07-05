@@ -83,8 +83,10 @@
         ${nail}${band}</g></g>`;
     }).join('');
 
-    const thumb = `<g transform="rotate(-40 70 208)"><g class="finger thumb">
-      <rect class="skin" x="62" y="136" width="16" height="76" rx="8"/>
+    // thumb is rooted INSIDE the palm (pivot 86,206 — mid-palm) and emerges through
+    // the left silhouette, so it always reads as attached
+    const thumb = `<g transform="rotate(-40 86 206)"><g class="finger thumb">
+      <rect class="skin" x="77.5" y="132" width="17" height="80" rx="8.5"/>
     </g></g>`;
 
     // palm: wide at the knuckles, tapering gracefully into the wrist

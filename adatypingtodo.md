@@ -9,6 +9,12 @@
   - [x] new tones — Arc 2 uses a warm marimba on a pentatonic scale (different per station)
 - [x] Arc 2 built past the gate *(done 5 Jul — braid, juggle, giraffe, tightrope at z -58..-66)*
 
+## Parent controls (don't tell Ada)
+
+- `index.html?grant` — marks all 7 Arc-1 stations graduated on THIS browser (opens the star gate, for testing/demo)
+- `index.html?reset` — wipes all progress on this browser
+- Progress is per-browser (localStorage): stars earned on the laptop don't show on another device.
+
 ## Stations
 
 Every station: gentle shake on a wrong key, rising tones, pips count the presses,

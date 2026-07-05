@@ -73,7 +73,12 @@
     // Coming back from a station (?from=...): skip the entry gate and spawn straight in.
     // ?from=deep also drops you PAST the first ring, facing the Arc-1 clearing —
     // progress you can feel, and no long walk back.
-    const FROM = new URLSearchParams(location.search).get('from');
+    const QS = new URLSearchParams(location.search);
+    const FROM = QS.get('from');
+    // parent controls (not linked anywhere): ?grant opens the star gate, ?reset wipes all progress
+    const ALLKEYS = ['jk','df','earrings','snail','ants','wink','butterfly','braid','juggle','giraffe','tightrope'];
+    if (QS.has('grant')) ALLKEYS.slice(0, 7).forEach(k => localStorage.setItem('ada.rounds.' + k, '3'));
+    if (QS.has('reset')) ALLKEYS.forEach(k => localStorage.removeItem('ada.rounds.' + k));
     if (FROM === 'deep') {
       camera.position.set(0, 1.6, -21);
       camera.lookAt(0, 1.6, -32);

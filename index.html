@@ -31,7 +31,7 @@
 </head>
 <body>
   <div id="dot"></div>
-  <div id="ver">forest v22</div>
+  <div id="ver">forest v23</div>
   <div id="start"><div class="ring">🌲</div></div>
 
   <script type="importmap">
@@ -258,12 +258,60 @@
     const portal6 = new THREE.Mesh(new THREE.TorusGeometry(3.2, 0.5, 16, 48), new THREE.MeshBasicMaterial({ color: 0x4ade80 }));
     portal6.position.set(GLADE6.x, 3, GLADE6.z); scene.add(portal6);
     const antRow = new THREE.Group();
-    const antMat = new THREE.MeshStandardMaterial({ color: 0x4a2c14, roughness: .8 });
+    function lilAnt(hatKind) {
+      const g = new THREE.Group();
+      const brown = new THREE.MeshStandardMaterial({ color: 0x7a4a26, roughness: .8 });
+      const dk    = new THREE.MeshStandardMaterial({ color: 0x2a1133 });
+      const wh    = new THREE.MeshStandardMaterial({ color: 0xffffff });
+      // three-part body along X: abdomen, thorax, head
+      const abd = new THREE.Mesh(new THREE.SphereGeometry(0.26, 14, 10), brown);
+      abd.position.set(-0.36, 0.02, 0); abd.scale.set(1.25, 1, 1); g.add(abd);
+      const tho = new THREE.Mesh(new THREE.SphereGeometry(0.17, 12, 10), brown); g.add(tho);
+      const head = new THREE.Mesh(new THREE.SphereGeometry(0.22, 14, 10), brown);
+      head.position.set(0.32, 0.08, 0); g.add(head);
+      // big friendly eyes (both sides — it's seen side-on)
+      [[0.16], [-0.16]].forEach(([z]) => {
+        const e = new THREE.Mesh(new THREE.SphereGeometry(0.065, 10, 8), wh); e.position.set(0.44, 0.14, z); g.add(e);
+        const p = new THREE.Mesh(new THREE.SphereGeometry(0.035, 8, 6), dk); p.position.set(0.49, 0.14, z * 1.05); g.add(p);
+      });
+      // six little legs
+      for (const s of [-1, 1]) for (let k = 0; k < 3; k++) {
+        const leg = new THREE.Mesh(new THREE.CylinderGeometry(0.022, 0.022, 0.32, 6), dk);
+        leg.position.set(-0.28 + k * 0.24, -0.17, s * 0.14);
+        leg.rotation.x = s * 0.55; leg.rotation.z = (k - 1) * 0.35; g.add(leg);
+      }
+      // antennae with bobble tips
+      for (const s of [-1, 1]) {
+        const an = new THREE.Mesh(new THREE.CylinderGeometry(0.016, 0.016, 0.3, 6), dk);
+        an.position.set(0.44, 0.34, s * 0.08); an.rotation.z = -0.55; an.rotation.x = s * 0.3; g.add(an);
+        const tip = new THREE.Mesh(new THREE.SphereGeometry(0.04, 6, 6), dk);
+        tip.position.set(0.53, 0.46, s * 0.12); g.add(tip);
+      }
+      // and, importantly, a tiny hat
+      if (hatKind === 0) {          // top hat
+        const brim = new THREE.Mesh(new THREE.CylinderGeometry(0.2, 0.2, 0.025, 14), dk);
+        brim.position.set(0.3, 0.29, 0); g.add(brim);
+        const top = new THREE.Mesh(new THREE.CylinderGeometry(0.12, 0.13, 0.24, 12), dk);
+        top.position.set(0.3, 0.42, 0); g.add(top);
+      } else if (hatKind === 1) {   // red cap
+        const capM = new THREE.MeshStandardMaterial({ color: 0xd64545, roughness: .7 });
+        const dome = new THREE.Mesh(new THREE.SphereGeometry(0.17, 12, 8, 0, Math.PI * 2, 0, Math.PI / 2), capM);
+        dome.position.set(0.3, 0.27, 0); g.add(dome);
+        const peak = new THREE.Mesh(new THREE.CylinderGeometry(0.1, 0.14, 0.025, 10), capM);
+        peak.position.set(0.44, 0.29, 0); g.add(peak);
+      } else {                      // gold crown
+        const gold = new THREE.MeshStandardMaterial({ color: 0xffd23f, roughness: .4, metalness: .4 });
+        const band = new THREE.Mesh(new THREE.CylinderGeometry(0.12, 0.15, 0.11, 10), gold);
+        band.position.set(0.3, 0.33, 0); g.add(band);
+        for (let k = 0; k < 3; k++) { const p = new THREE.Mesh(new THREE.SphereGeometry(0.035, 6, 6), gold);
+          p.position.set(0.3 + (k - 1) * 0.085, 0.42, 0); g.add(p); }
+      }
+      return g;
+    }
     for (let k = 0; k < 3; k++) {
-      const a = new THREE.Group();
-      [[0.32, 0, 0, 0], [0.26, 0, 0.45, 0], [0.22, 0, 0.82, 0]].forEach(([r,, zz]) => {
-        const b = new THREE.Mesh(new THREE.SphereGeometry(r, 12, 10), antMat); b.position.z = zz; a.add(b); });
-      a.position.x = (k - 1) * 1.1; a.rotation.y = Math.PI / 2; antRow.add(a);
+      const a = lilAnt(k);
+      a.position.x = (k - 1) * 1.2; a.rotation.y = Math.PI / 2; a.userData.phase = k * 0.7;
+      antRow.add(a);
     }
     antRow.position.set(GLADE6.x, 2.6, GLADE6.z + 0.2); scene.add(antRow);
     // glade 7 portal (orange — the wink) + a peach face mid-wink
@@ -277,18 +325,54 @@
     const eyeW = new THREE.Mesh(new THREE.BoxGeometry(0.3, 0.05, 0.08), eyeMat); eyeW.position.set(0.38, 0.22, 0.98); winkFace.add(eyeW);  // the winking eye
     const mouth = new THREE.Mesh(new THREE.TorusGeometry(0.26, 0.05, 8, 16, Math.PI), eyeMat);
     mouth.position.set(0, -0.28, 0.95); mouth.rotation.z = Math.PI; winkFace.add(mouth);
+    // round ears with pink inners, a button nose and blushing cheeks — a proper little creature
+    const peachM = new THREE.MeshStandardMaterial({ color: 0xffe0b3, roughness: .85 });
+    const pinkM  = new THREE.MeshStandardMaterial({ color: 0xff9ec4, roughness: .8 });
+    for (const s of [-1, 1]) {
+      const ear = new THREE.Mesh(new THREE.SphereGeometry(0.36, 14, 12), peachM);
+      ear.position.set(s * 0.66, 0.86, -0.08); ear.scale.set(1, 1.15, 0.55); winkFace.add(ear);
+      const inner = new THREE.Mesh(new THREE.SphereGeometry(0.2, 12, 10), pinkM);
+      inner.position.set(s * 0.64, 0.85, 0.13); inner.scale.set(1, 1.1, 0.35); winkFace.add(inner);
+      const cheek = new THREE.Mesh(new THREE.SphereGeometry(0.14, 10, 8), pinkM);
+      cheek.position.set(s * 0.55, -0.12, 0.85); cheek.scale.set(1, 0.65, 0.4); winkFace.add(cheek);
+    }
+    const nose = new THREE.Mesh(new THREE.SphereGeometry(0.09, 10, 8), pinkM);
+    nose.position.set(0, -0.04, 1.02); nose.scale.set(1.15, 0.8, 0.6); winkFace.add(nose);
     winkFace.position.set(GLADE7.x, 3, GLADE7.z + 0.2); scene.add(winkFace);
     // glade 8 portal (sky blue — butterfly wings) + a flapping butterfly
     const portal8 = new THREE.Mesh(new THREE.TorusGeometry(3.2, 0.5, 16, 48), new THREE.MeshBasicMaterial({ color: 0x7dd3fc }));
     portal8.position.set(GLADE8.x, 3, GLADE8.z); scene.add(portal8);
     const bfly = new THREE.Group();
-    const bbody = new THREE.Mesh(new THREE.CapsuleGeometry(0.14, 0.9, 4, 10), new THREE.MeshStandardMaterial({ color: 0x2a1133 }));
-    bfly.add(bbody);
-    const wingMat = new THREE.MeshStandardMaterial({ color: 0xff8fc0, emissive: 0xff6b9d, emissiveIntensity: .3, roughness: .5, side: THREE.DoubleSide });
-    const wingL = new THREE.Mesh(new THREE.CircleGeometry(0.85, 20), wingMat);
-    wingL.position.x = -0.55; wingL.scale.y = 1.25; bfly.add(wingL);
-    const wingR = new THREE.Mesh(new THREE.CircleGeometry(0.85, 20), wingMat);
-    wingR.position.x = 0.55; wingR.scale.y = 1.25; bfly.add(wingR);
+    const plumM = new THREE.MeshStandardMaterial({ color: 0x4a2a5a, roughness: .7 });
+    const bbody = new THREE.Mesh(new THREE.CapsuleGeometry(0.12, 0.75, 4, 10), plumM); bfly.add(bbody);
+    const bhead = new THREE.Mesh(new THREE.SphereGeometry(0.17, 12, 10), plumM);
+    bhead.position.y = 0.56; bfly.add(bhead);
+    const bwh = new THREE.MeshStandardMaterial({ color: 0xffffff });
+    for (const s of [-1, 1]) {                       // little face + curled antennae
+      const e = new THREE.Mesh(new THREE.SphereGeometry(0.045, 8, 6), bwh);
+      e.position.set(s * 0.07, 0.6, 0.14); bfly.add(e);
+      const an = new THREE.Mesh(new THREE.CylinderGeometry(0.014, 0.014, 0.3, 6), plumM);
+      an.position.set(s * 0.09, 0.79, 0); an.rotation.z = -s * 0.5; bfly.add(an);
+      const tip = new THREE.Mesh(new THREE.SphereGeometry(0.04, 6, 6), plumM);
+      tip.position.set(s * 0.17, 0.92, 0); bfly.add(tip);
+    }
+    // shaped wings: big pink uppers, purple lowers, white + gold spots — pivoted to flap
+    const wingUpM = new THREE.MeshStandardMaterial({ color: 0xff8fc0, emissive: 0xff6b9d, emissiveIntensity: .25, roughness: .5, side: THREE.DoubleSide });
+    const wingLoM = new THREE.MeshStandardMaterial({ color: 0xc77dff, emissive: 0x8e54d6, emissiveIntensity: .2, roughness: .5, side: THREE.DoubleSide });
+    function makeWing(side) {
+      const w = new THREE.Group();
+      const up = new THREE.Mesh(new THREE.CircleGeometry(0.6, 20), wingUpM);
+      up.position.set(side * 0.58, 0.28, 0); up.scale.set(1, 1.3, 1); w.add(up);
+      const lo = new THREE.Mesh(new THREE.CircleGeometry(0.4, 18), wingLoM);
+      lo.position.set(side * 0.44, -0.42, 0.01); w.add(lo);
+      const spot = new THREE.Mesh(new THREE.CircleGeometry(0.13, 10), new THREE.MeshBasicMaterial({ color: 0xffffff, side: THREE.DoubleSide }));
+      spot.position.set(side * 0.62, 0.38, 0.02); w.add(spot);
+      const spot2 = new THREE.Mesh(new THREE.CircleGeometry(0.075, 8), new THREE.MeshBasicMaterial({ color: 0xfff3b0, side: THREE.DoubleSide }));
+      spot2.position.set(side * 0.42, -0.42, 0.02); w.add(spot2);
+      return w;
+    }
+    const wingL = makeWing(-1), wingR = makeWing(1);
+    bfly.add(wingL); bfly.add(wingR);
     bfly.position.set(GLADE8.x, 3, GLADE8.z + 0.2); scene.add(bfly);
 
     // ---- a cute low-poly 3D axolotl, built from primitives (faces +Z) ----
@@ -542,12 +626,14 @@
       lilSnail.position.y = 2.1 + Math.sin(clock.elapsedTime * 1.4 + 1) * 0.18;
       for (const st of lilSnail.userData.stalks)                          // eye stalks waggle gently
         st.rotation.z = st.userData.baseZ + Math.sin(clock.elapsedTime * 2.1 + st.userData.baseZ * 9) * 0.1;
-      antRow.position.y = 2.6 + Math.sin(clock.elapsedTime * 2.2) * 0.15; // ants bob along
+      antRow.position.y = 2.6 + Math.sin(clock.elapsedTime * 2.2) * 0.12; // the row drifts...
+      for (const a of antRow.children)                                    // ...and each ant marches
+        a.position.y = Math.abs(Math.sin(clock.elapsedTime * 3 + a.userData.phase)) * 0.14;
       antRow.rotation.y = Math.atan2(camera.position.x - GLADE6.x, camera.position.z - GLADE6.z) + Math.PI / 2;
       winkFace.rotation.y = Math.atan2(camera.position.x - GLADE7.x, camera.position.z - GLADE7.z);  // face the player
       winkFace.position.y = 3 + Math.sin(clock.elapsedTime * 1.6 + 2) * 0.18;
-      const fl = 0.35 + Math.abs(Math.sin(clock.elapsedTime * 4)) * 0.65; // wings flap
-      wingL.scale.x = fl; wingR.scale.x = fl;
+      const fl = Math.sin(clock.elapsedTime * 5) * 0.55;                  // wings flap from the body
+      wingL.rotation.y = fl; wingR.rotation.y = -fl;
       bfly.rotation.y = Math.atan2(camera.position.x - GLADE8.x, camera.position.z - GLADE8.z);
       bfly.position.y = 3 + Math.sin(clock.elapsedTime * 2.4 + 4) * 0.3;
       axo.rotation.y = Math.atan2(camera.position.x - GLADE.x, camera.position.z - GLADE.z);  // face the player

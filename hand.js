@@ -21,10 +21,10 @@
   // finger geometry (viewBox 0 0 200 300) — slim, gently fanned; ang = splay,
   // (bx,by) = knuckle pivot the splay rotates around
   const F = [
-    { cls: 'f-index',  x: 66,  y: 74, w: 16,   h: 94,  ang: -7, bx: 74,  by: 158 },
-    { cls: 'f-middle', x: 90,  y: 60, w: 16.5, h: 108, ang: -1, bx: 98,  by: 158 },
-    { cls: 'f-ring',   x: 113, y: 70, w: 15.5, h: 98,  ang: 5,  bx: 121, by: 158 },
-    { cls: 'f-pinky',  x: 130, y: 90, w: 13.5, h: 84,  ang: 11, bx: 137, by: 158 },
+    { cls: 'f-index',  x: 67,    y: 74, w: 16,   h: 94,  ang: -4, bx: 75,  by: 158 },
+    { cls: 'f-middle', x: 88,    y: 60, w: 16.5, h: 108, ang: -1, bx: 96,  by: 158 },
+    { cls: 'f-ring',   x: 109.5, y: 70, w: 15.5, h: 98,  ang: 3,  bx: 117, by: 158 },
+    { cls: 'f-pinky',  x: 130,   y: 90, w: 13.5, h: 84,  ang: 8,  bx: 137, by: 158 },
   ];
 
   let cssDone = false;

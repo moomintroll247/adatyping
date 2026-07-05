@@ -52,6 +52,10 @@
     .finger.active { background:var(--gold); box-shadow:0 0 5vmin 1vmin rgba(255,210,63,.7); animation:wig 1.4s ease-in-out infinite; }
     @keyframes wig { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-1vmin)} }
     .finger.tap { transform:translateY(2.5vmin) scaleY(.9); }
+    #pips { display:flex; align-items:center; }
+    .pip { border-radius:50%; background:rgba(255,255,255,.18); border:.4vmin solid rgba(255,255,255,.5); }
+    .pip.on { animation:pippop .35s cubic-bezier(.2,1.5,.4,1) forwards; }
+    @keyframes pippop { 0%{transform:scale(.4)} 100%{transform:scale(1)} }
   </style>
 </head>
 <body>
@@ -60,10 +64,11 @@
   <canvas id="squish"></canvas>
   <main id="stage">
     <div id="parade"><div id="ground"></div></div>
+    <div id="pips"></div>
     <div id="key">a</div>
     <div id="hand"></div>
   </main>
-  <div id="ver">ants v2</div>
+  <div id="ver">ants v3</div>
 
   <script src="hand.js"></script>
   <script>
@@ -85,7 +90,11 @@
         l.style.animationDelay=(-Math.random()*15)+'s'; bg.appendChild(l);} })();
 
     function slotX(i, n){ return (6 + i * (78 / Math.max(n-1,1))) + 'vmin'; }
-    function renderStage(){ parade.querySelectorAll('.ant').forEach(e=>e.remove()); idx = 0; }
+    const pipsEl = document.getElementById('pips');
+    function buildPips(n){ pipsEl.innerHTML=''; const sz=Math.min(5, 60/n); pipsEl.style.gap=Math.min(2, 14/n)+'vmin';
+      for(let i=0;i<n;i++){ const p=document.createElement('div'); p.className='pip'; p.style.width=p.style.height=sz+'vmin'; pipsEl.appendChild(p);} }
+    function markPip(i){ const p=pipsEl.children[i]; if(p){ p.classList.add('on'); p.style.background=COLS[i%COLS.length]; p.style.borderColor='rgba(255,255,255,.8)'; } }
+    function renderStage(){ parade.querySelectorAll('.ant').forEach(e=>e.remove()); idx = 0; buildPips(STAGES[stage]); }
     function press(){
       const n = STAGES[stage];
       const fin = handEl.querySelector('.f-pinky');
@@ -96,7 +105,7 @@
       a.appendChild(h); parade.appendChild(a);
       void a.offsetWidth;                                  // commit the off-screen start...
       a.style.left = slotX(myIdx, n);                      // ...then march to its spot
-      toot(myIdx);
+      toot(myIdx); markPip(myIdx);
       idx++;
       if(idx >= n){ busy = true; setTimeout(fanfare, 850); setTimeout(next, 3000); }
     }
@@ -147,7 +156,7 @@
         squishes.push({
           x:cxp+(Math.random()-.5)*100, y:cyp+(Math.random()-.5)*60,
           vx:(Math.random()-.5)*20, vy:-Math.random()*12-3,
-          r:16+Math.random()*16, c:COLS[(Math.random()*COLS.length)|0], squash:1,
+          r:16+Math.random()*16, c:COLS[(Math.random()*COLS.length)|0], squash:1, born:performance.now(),
           kind:KINDS[(Math.random()*KINDS.length)|0], deco, dots });
       }
       if(squishes.length>80) squishes.splice(0, squishes.length-80);
@@ -155,6 +164,9 @@
     }
     function loop(){
       cx.clearRect(0,0,cv.width,cv.height);
+      const nowT=performance.now();                        // celebrations melt away after a few seconds
+      squishes=squishes.filter(s=>{ if(nowT-s.born>5500) s.r*=0.90; return s.r>2; });
+      if(!squishes.length){ raf=null; return; }
       for(const s of squishes){
         s.vy+=G; s.x+=s.vx; s.y+=s.vy;
         if(s.y+s.r>cv.height){ s.y=cv.height-s.r; if(s.vy>4)s.squash=.6; s.vy*=-REST; s.vx*=.94; if(Math.abs(s.vy)<1.2)s.vy=0; }

@@ -59,6 +59,10 @@
     .finger.active { background:var(--gold); box-shadow:0 0 4vmin .8vmin rgba(255,210,63,.7); animation:wig 1.4s ease-in-out infinite; }
     @keyframes wig { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-.8vmin)} }
     .finger.tap { transform:translateY(1.8vmin) scaleY(.9); }
+    #pips { display:flex; align-items:center; }
+    .pip { border-radius:50%; background:rgba(255,255,255,.18); border:.4vmin solid rgba(255,255,255,.5); }
+    .pip.on { animation:pippop .35s cubic-bezier(.2,1.5,.4,1) forwards; }
+    @keyframes pippop { 0%{transform:scale(.4)} 100%{transform:scale(1)} }
   </style>
 </head>
 <body>
@@ -70,6 +74,7 @@
     <div id="fly" class="hover"><span class="b">🦋</span></div>
   </div>
   <main id="stage">
+    <div id="pips"></div>
     <div id="keys">
       <div class="bigkey" id="ka">a</div>
       <div class="bigkey" id="ks">;</div>
@@ -79,7 +84,7 @@
       <div class="hand" id="hr"></div>
     </div>
   </main>
-  <div id="ver">butterfly v2</div>
+  <div id="ver">butterfly v3</div>
 
   <script src="hand.js"></script>
   <script>
@@ -87,7 +92,8 @@
     buildHand(document.getElementById('hr'), {cuff:'#0369a1'});
     // a flaps the left wing, ; flaps the right — alternating pinkies fly the butterfly
     // up to the hedgehog waiting at the top. Landing = the flower crown blooms.
-    const STAGES = [8, 12, 16];                 // presses per climb
+    function randSeq(n){ let s=''; for(let i=0;i<n;i++) s+=Math.random()<0.5?'a':';'; return s; }
+    const STAGES = ['a;a;a;a;', 'aa;;aa;;aa;;', randSeq(16)];   // alternation, doubles, then a surprise mix
     let stage = 0, idx = 0, busy = false;
     const fly = document.getElementById('fly'), bfly = fly.querySelector('.b'),
           flower = document.getElementById('flower'),
@@ -100,22 +106,26 @@
         p.style.animationDuration=(8+Math.random()*9)+'s'; p.style.animationDelay=(-Math.random()*15)+'s';
         p.style.transform='scale('+(0.7+Math.random()*0.9)+')'; bg.appendChild(p);} })();
 
-    function want(){ return idx % 2 === 0 ? 'a' : ';'; }   // strict alternation, left first
+    function want(){ return STAGES[stage][idx]; }
     function cue(){
       const w = want();
       ka.classList.toggle('want', w==='a'); ks.classList.toggle('want', w===';');
       hl.querySelector('.f-pinky').classList.toggle('active', w==='a');
       hr.querySelector('.f-pinky').classList.toggle('active', w===';');
     }
-    function renderStage(){ idx = 0; fly.style.bottom='38vh'; flower.classList.remove('bloom'); fly.classList.add('hover'); cue(); }
+    const pipsEl = document.getElementById('pips');
+    function buildPips(n){ pipsEl.innerHTML=''; const sz=Math.min(5, 60/n); pipsEl.style.gap=Math.min(2, 14/n)+'vmin';
+      for(let i=0;i<n;i++){ const p=document.createElement('div'); p.className='pip'; p.style.width=p.style.height=sz+'vmin'; pipsEl.appendChild(p);} }
+    function markPip(i){ const p=pipsEl.children[i]; if(p){ p.classList.add('on'); p.style.background=COLS[i%COLS.length]; p.style.borderColor='rgba(255,255,255,.8)'; } }
+    function renderStage(){ idx = 0; fly.style.bottom='38vh'; flower.classList.remove('bloom'); fly.classList.add('hover'); cue(); buildPips(STAGES[stage].length); }
     function press(){
-      const n = STAGES[stage], w = want();
+      const n = STAGES[stage].length, w = want();
       const hand = w==='a' ? hl : hr;
       const fin = hand.querySelector('.f-pinky');
       fin.classList.add('tap'); setTimeout(()=>fin.classList.remove('tap'),120);
       bfly.classList.remove('flapL','flapR'); void bfly.offsetWidth;
       bfly.classList.add(w==='a' ? 'flapL' : 'flapR');
-      flap(idx);
+      flap(idx); markPip(idx);
       idx++;
       fly.style.bottom = (38 + (idx/n) * 48) + 'vh';       // one wingbeat higher
       if(idx >= n){ busy = true; fly.classList.remove('hover'); land(); setTimeout(next, 3200); }
@@ -167,7 +177,7 @@
         squishes.push({
           x:cxp+(Math.random()-.5)*100, y:cyp+(Math.random()-.5)*60,
           vx:(Math.random()-.5)*20, vy:-Math.random()*12-3,
-          r:16+Math.random()*16, c:COLS[(Math.random()*COLS.length)|0], squash:1,
+          r:16+Math.random()*16, c:COLS[(Math.random()*COLS.length)|0], squash:1, born:performance.now(),
           kind:KINDS[(Math.random()*KINDS.length)|0], deco, dots });
       }
       if(squishes.length>80) squishes.splice(0, squishes.length-80);
@@ -175,6 +185,9 @@
     }
     function loop(){
       cx.clearRect(0,0,cv.width,cv.height);
+      const nowT=performance.now();                        // celebrations melt away after a few seconds
+      squishes=squishes.filter(s=>{ if(nowT-s.born>5500) s.r*=0.90; return s.r>2; });
+      if(!squishes.length){ raf=null; return; }
       for(const s of squishes){
         s.vy+=G; s.x+=s.vx; s.y+=s.vy;
         if(s.y+s.r>cv.height){ s.y=cv.height-s.r; if(s.vy>4)s.squash=.6; s.vy*=-REST; s.vx*=.94; if(Math.abs(s.vy)<1.2)s.vy=0; }

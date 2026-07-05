@@ -67,18 +67,14 @@
   <main id="stage">
     <div id="barwrap"><div id="bar"></div></div>
     <div id="key">l</div>
-    <div id="hand">
-      <div class="palm"></div>
-      <div class="finger thumb"></div>
-      <div class="finger f-index"></div>
-      <div class="finger f-middle"></div>
-      <div class="finger f-ring active"></div>
-      <div class="finger f-pinky"></div>
-    </div>
+    <div id="hand"></div>
   </main>
-  <div id="ver">earrings v1</div>
+  <div id="ver">earrings v2</div>
 
+  <script src="hand.js"></script>
   <script>
+    buildHand(document.getElementById('hand'), {cuff:'#be185d'});
+    document.querySelector('#hand .f-ring').classList.add('active');
     // Every press of l hangs one more earring on the bar. Stages just add hooks.
     const STAGES = [4, 6, 8];                       // earrings per stage
     const CHARMS = ['💎','⭐','🍓','🌸','🦋','🌙','🍒','🐞'];
@@ -104,7 +100,8 @@
       document.querySelectorAll('.spark').forEach(s=>s.remove());
       const fin = handEl.querySelector('.f-ring');
       for(let i=0;i<3;i++){ const sp=document.createElement('div'); sp.className='spark'; sp.textContent='✨';
-        sp.style.left=(fin.offsetLeft/handEl.offsetWidth*100 + (i-1)*4)+'%';
+        const fb=fin.getBoundingClientRect(), hb=handEl.getBoundingClientRect();
+        sp.style.left=(((fb.left+fb.width/2-hb.left)/hb.width)*100 + (i-1)*4)+'%';
         sp.style.bottom=(60+i*10)+'%'; sp.style.animationDelay=(i*0.3)+'s'; handEl.appendChild(sp); }
     }
     function press(){

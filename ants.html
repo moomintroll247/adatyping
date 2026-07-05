@@ -61,18 +61,14 @@
   <main id="stage">
     <div id="parade"><div id="ground"></div></div>
     <div id="key">a</div>
-    <div id="hand">
-      <div class="palm"></div>
-      <div class="finger thumb"></div>
-      <div class="finger f-index"></div>
-      <div class="finger f-middle"></div>
-      <div class="finger f-ring"></div>
-      <div class="finger f-pinky active"></div>
-    </div>
+    <div id="hand"></div>
   </main>
-  <div id="ver">ants v1</div>
+  <div id="ver">ants v2</div>
 
+  <script src="hand.js"></script>
   <script>
+    buildHand(document.getElementById('hand'), {cuff:'#166534'});
+    document.querySelector('#hand .f-pinky').classList.add('active');
     // The smallest finger marches the smallest animals: every a brings on one more
     // ant in a tiny hat. A full row = the marching band plays; the last ant backflips.
     const STAGES = [4, 6, 8];

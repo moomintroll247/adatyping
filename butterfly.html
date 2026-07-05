@@ -75,19 +75,16 @@
       <div class="bigkey" id="ks">;</div>
     </div>
     <div id="hands">
-      <div class="hand left" id="hl">
-        <div class="palm"></div><div class="finger thumb"></div><div class="finger f-index"></div>
-        <div class="finger f-middle"></div><div class="finger f-ring"></div><div class="finger f-pinky"></div>
-      </div>
-      <div class="hand" id="hr">
-        <div class="palm"></div><div class="finger thumb"></div><div class="finger f-index"></div>
-        <div class="finger f-middle"></div><div class="finger f-ring"></div><div class="finger f-pinky"></div>
-      </div>
+      <div class="hand left" id="hl"></div>
+      <div class="hand" id="hr"></div>
     </div>
   </main>
-  <div id="ver">butterfly v1</div>
+  <div id="ver">butterfly v2</div>
 
+  <script src="hand.js"></script>
   <script>
+    buildHand(document.getElementById('hl'), {cuff:'#0369a1'});
+    buildHand(document.getElementById('hr'), {cuff:'#0369a1'});
     // a flaps the left wing, ; flaps the right — alternating pinkies fly the butterfly
     // up to the hedgehog waiting at the top. Landing = the flower crown blooms.
     const STAGES = [8, 12, 16];                 // presses per climb

@@ -88,7 +88,7 @@
     </g></g>`;
 
     // palm: wide at the knuckles, tapering gracefully into the wrist
-    const palm = `<path class="skin" d="M60 152 Q54 196 72 216 L72 240 L128 240 L128 216 Q146 196 144 152 Q100 141 60 152 Z"/>`;
+    const palm = `<path class="skin" d="M66 152 Q56 196 72 216 L72 240 L128 240 L128 216 Q146 196 144 152 Q100 141 66 152 Z"/>`;
 
     let deco = '';
     if (pattern === 'stripes') deco = [252, 264, 276].map(y =>

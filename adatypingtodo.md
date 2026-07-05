@@ -13,7 +13,8 @@
 
 ## Parent controls (don't tell Ada)
 
-- `index.html?grant` — marks all 7 Arc-1 stations graduated on THIS browser (opens the star gate, for testing/demo)
+- `index.html?grant` — marks all 7 Arc-1 stations graduated on THIS browser (opens gate 1, for testing/demo)
+- `index.html?grant2` — marks Arc 1 + Arc 2 graduated (opens both gates)
 - `index.html?reset` — wipes all progress on this browser
 - Progress is per-browser (localStorage): stars earned on the laptop don't show on another device.
 
@@ -39,16 +40,16 @@ the forest button glows).
 | 9 | **🦊 Juggling Fox** (`juggle.html`) | Toss the circus fox's four balls | j k l ; (right-hand rolls) | `jkl;` → `;lkj` → `jkl;;lkj` → random 8 |
 | 10 | **🦒 Stretchy Giraffes** (`giraffe.html`) | Index reaches stretch necks to meet | g & h | `ghghgh` → `gghhgghh` → random 10 |
 | 11 | **🤸 Tightrope** (`tightrope.html`) | Tutu elephant crosses the wire | f↔j, d↔k, s↔l, a↔; | 8 steps per pair, all four pairs |
+| 12 | **🎹 Piano Paws** (`piano.html`) | Home row = piano; play real tunes, then hear them back | all 8 | Hot Cross Buns → Mary's Lamb → Twinkle |
+| 13 | **🪩 Dance Party** (`dance.html`) | Every key is a dance move; routine replays | all 8 | random 6 → 8 → 10 |
+| 14 | **🫧 Bubble Fashion Show** (`fashion.html`) | Pop the bubble-letter, dress the model, catwalk | all 8 | random 5 → 6 → 8 |
+| 15 | **🧸 Squishy Factory** (`factory.html`) | 3 presses: inflate → paint → face; shelf tips! | all 8 (×3 each) | 3 → 4 → 5 squishies |
+| 16 | **🌙 Firefly Jars** (`fireflies.html`) | Catch glowing letters into the jar; lantern finale | all 8 | random 5 → 6 → 8 (wind-down) |
 
 ### Planned (design in STATIONS.md)
 
 | # | Station | Theme | Keys |
 |---|---------|-------|------|
-| 12 | 🎹 Piano Paws | Home row is a piano — play real tunes | all 8 as notes |
-| 13 | 🪩 Dance Party | Build the possum's disco routine | mirror pairs = moves |
-| 14 | 🫧 Bubble Fashion Show | Pop bubbles, dress the capybara | random singles |
-| 15 | 🧸 Squishy Factory | Triple-press to make squishies | triple-presses |
-| 16 | 🌙 Firefly Jars | Gentle timing, wind-down | slow catches |
 | 17 | 🦔 Hedgehog Hairstyles | Copy the colour pattern (Simon) | 2–4 key patterns |
 | 18 | 🐣 Word Nest | First CVC words (picture + voice) | dad sad lad fad had gal jag |
 | 19 | 🎪 Circus Grand Finale | 30-second medley + fireworks | everything |

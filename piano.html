@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>piano paws</title>
+  <style>
+    :root { --ink:#334155; --ink-deep:#1e293b; --ink-bright:#94a3b8; --cream:#fdfdfb; --gold:#ffd23f; }
+    * { box-sizing:border-box; margin:0; padding:0; }
+    html,body { height:100%; overflow:hidden; }
+    body { background:linear-gradient(160deg,#1e293b,#475569 55%,#94a3b8);
+           font-family:"Baloo 2","Comic Sans MS",system-ui,sans-serif; user-select:none; -webkit-user-select:none; touch-action:manipulation; }
+    #bg { position:fixed; inset:0; overflow:hidden; z-index:0; }
+    .notebg { position:absolute; bottom:-10vh; font-size:5vmin; color:rgba(255,255,255,.25); animation:riseN linear infinite; }
+    @keyframes riseN { 0%{transform:translateY(0) rotate(-10deg); opacity:0} 15%{opacity:1} 85%{opacity:1}
+      100%{transform:translateY(-115vh) translateX(var(--drift,0)) rotate(15deg); opacity:0} }
+    #squish { position:fixed; inset:0; z-index:40; pointer-events:none; }
+    #toforest { position:fixed; top:2.5vh; left:2.5vw; z-index:60; width:13vmin; height:13vmin; border-radius:50%;
+      display:flex; align-items:center; justify-content:center; font-size:7vmin; text-decoration:none;
+      background:rgba(255,255,255,.2); border:.5vmin solid rgba(255,255,255,.5); }
+    #ver { position:fixed; right:8px; bottom:6px; z-index:100; font:13px/1 ui-monospace,monospace; color:rgba(255,255,255,.6); }
+    #stage { position:relative; z-index:10; height:100%; display:flex; flex-direction:column; align-items:center; justify-content:flex-end; gap:2.5vh; padding-bottom:2vh; }
+
+    /* ---- the piano the kitten walks along ---- */
+    #pianowrap { position:relative; padding-top:11vmin; }
+    #cat { position:absolute; top:0; left:0; font-size:9vmin; line-height:1; transition:left .3s cubic-bezier(.3,1.2,.5,1); }
+    #piano { display:flex; gap:.7vmin; }
+    .pkey { width:9.5vmin; height:19vmin; background:var(--cream); border-radius:0 0 2vmin 2vmin;
+      display:flex; align-items:flex-end; justify-content:center; padding-bottom:1.6vmin;
+      font-size:5.5vmin; font-weight:800; color:var(--ink); box-shadow:0 .9vmin 0 rgba(0,0,0,.3);
+      transition:transform .08s, box-shadow .2s; }
+    .pkey.lit { box-shadow:0 .9vmin 0 rgba(0,0,0,.3), 0 0 5vmin rgba(255,210,63,.85), inset 0 0 0 .7vmin var(--gold); }
+    .pkey.down { transform:translateY(1vmin); background:#fff7dd; }
+
+    #key { width:18vmin; height:18vmin; border-radius:24px; background:var(--cream);
+      display:flex; align-items:center; justify-content:center; font-size:11vmin; font-weight:800; color:var(--ink-deep);
+      box-shadow:0 1vmin 0 rgba(0,0,0,.25), inset 0 0 0 .7vmin var(--ink-bright); }
+    #key.nope { animation:nope .35s; }
+    @keyframes nope { 0%,100%{transform:translateX(0)} 25%{transform:translateX(-2vmin)} 75%{transform:translateX(2vmin)} }
+
+    .hand { position:relative; width:24vmin; height:30vmin; }
+    .hand.left { transform:scaleX(-1); }
+    #deck { display:flex; align-items:flex-end; gap:6vmin; }
+    #keycol { display:flex; flex-direction:column; align-items:center; gap:4vmin; }
+    #pips { display:flex; align-items:center; }
+    .pip { border-radius:50%; background:rgba(255,255,255,.18); border:.4vmin solid rgba(255,255,255,.5); }
+    .pip.on { animation:pippop .35s cubic-bezier(.2,1.5,.4,1) forwards; }
+    @keyframes pippop { 0%{transform:scale(.4)} 100%{transform:scale(1)} }
+    #ticks { position:fixed; top:2.5vh; right:2.5vw; z-index:60; display:flex; gap:1.5vmin; }
+    .tick { width:6.5vmin; height:6.5vmin; border-radius:50%; background:rgba(255,255,255,.15);
+      border:.5vmin solid rgba(255,255,255,.5); display:flex; align-items:center; justify-content:center; font-size:4vmin; }
+    .tick.done { background:rgba(255,210,63,.3); border-color:#ffd23f; }
+    #grad { position:fixed; inset:0; z-index:55; display:flex; align-items:center; justify-content:center; pointer-events:none; }
+    #gradcup { font-size:32vmin; animation:gradpop 1s cubic-bezier(.2,1.4,.4,1), gradbob 2.2s ease-in-out 1s infinite;
+      filter:drop-shadow(0 0 6vmin rgba(255,210,63,.8)); }
+    @keyframes gradpop { 0%{transform:scale(0) rotate(-20deg)} 100%{transform:scale(1) rotate(0)} }
+    @keyframes gradbob { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-3vmin)} }
+    #toforest.glow { border-color:#ffd23f; animation:tglow 1.2s ease-in-out infinite; }
+    @keyframes tglow { 0%,100%{box-shadow:0 0 2vmin rgba(255,210,63,.5)} 50%{box-shadow:0 0 7vmin rgba(255,210,63,.95)} }
+  </style>
+</head>
+<body>
+  <div id="bg"></div>
+  <a id="toforest" href="index.html?from=deep3" aria-label="forest">🌲</a>
+  <div id="ticks"></div>
+  <canvas id="squish"></canvas>
+  <main id="stage">
+    <div id="pianowrap">
+      <div id="cat">🐱</div>
+      <div id="piano"></div>
+    </div>
+    <div id="deck">
+      <div class="hand left" id="hl"></div>
+      <div id="keycol"><div id="pips"></div><div id="key"></div></div>
+      <div class="hand" id="hr"></div>
+    </div>
+  </main>
+  <div id="ver">piano v1</div>
+
+  <script src="hand.js?v=5"></script>
+  <script>
+    buildHand(document.getElementById('hl'), {cuff:'#1e293b'});
+    buildHand(document.getElementById('hr'), {cuff:'#1e293b'});
+    // The home row IS a piano. The kitten walks to the next key, she presses it —
+    // and without reading a note she has played a real tune. Then it plays back.
+    const KEYS = ['a','s','d','f','j','k','l',';'];
+    const NOTEF = { a:523.25, s:587.33, d:659.25, f:698.46, j:783.99, k:880, l:987.77, ';':1046.5 };
+    const TUNES = [
+      'dsadsaaaaassssdsa',   // Hot Cross Buns
+      'dsasdddsssdjj',       // Mary Had a Little Lamb (first line)
+      'aajjkkjffddssa',      // Twinkle Twinkle (first phrase)
+    ];
+    const STAGES = TUNES;
+    const FINGERL = { a:'f-pinky', s:'f-ring', d:'f-middle', f:'f-index' };
+    const FINGERR = { j:'f-index', k:'f-middle', l:'f-ring', ';':'f-pinky' };
+    let stage = 0, idx = 0, busy = false;
+    const keyEl = document.getElementById('key'), piano = document.getElementById('piano'),
+          cat = document.getElementById('cat'),
+          hl = document.getElementById('hl'), hr = document.getElementById('hr');
+    KEYS.forEach(k=>{ const p=document.createElement('div'); p.className='pkey'; p.dataset.k=k;
+      p.textContent = k; piano.appendChild(p); });
+    const PKEY = {}; document.querySelectorAll('.pkey').forEach(p=>PKEY[p.dataset.k]=p);
+
+    (function(){ const bg=document.getElementById('bg');
+      const N=['🎵','🎶','♪','♫'];
+      for(let i=0;i<9;i++){ const n=document.createElement('div'); n.className='notebg';
+        n.textContent=N[i%N.length]; n.style.left=Math.random()*100+'vw';
+        n.style.setProperty('--drift',(Math.random()*16-8)+'vw'); n.style.animationDuration=(10+Math.random()*10)+'s';
+        n.style.animationDelay=(-Math.random()*16)+'s'; bg.appendChild(n);} })();
+
+    const pipsEl = document.getElementById('pips');
+    function buildPips(n){ pipsEl.innerHTML=''; const sz=Math.min(4.2, 62/n); pipsEl.style.gap=Math.min(1.6, 12/n)+'vmin';
+      for(let i=0;i<n;i++){ const p=document.createElement('div'); p.className='pip'; p.style.width=p.style.height=sz+'vmin'; pipsEl.appendChild(p);} }
+    function markPip(i){ const p=pipsEl.children[i]; if(p){ p.classList.add('on'); p.style.background=COLS[i%COLS.length]; p.style.borderColor='rgba(255,255,255,.8)'; } }
+
+    const SKEY = 'piano';
+    const sealBark = new Audio('assets/seal.mp3'), sealCheer = new Audio('assets/seal_cheer.mp3');
+    let round = Math.min(3, +(localStorage.getItem('ada.rounds.'+SKEY)||0));
+    const ticksEl = document.getElementById('ticks');
+    function drawTicks(){ ticksEl.innerHTML='';
+      for(let i=0;i<3;i++){ const t=document.createElement('div'); t.className='tick'+(i<round?' done':'');
+        t.textContent=i<round?'⭐':''; ticksEl.appendChild(t); } }
+    function graduate(){
+      busy = true;
+      const g=document.createElement('div'); g.id='grad'; g.innerHTML='<div id="gradcup">🏆</div>';
+      document.body.appendChild(g);
+      document.getElementById('toforest').classList.add('glow');
+      sealCheer.currentTime = 0; sealCheer.play().catch(()=>{});
+      [0,700,1400].forEach(d=>setTimeout(()=>{ chord(); squishBurst(); }, d));
+    }
+    drawTicks();
+
+    function cueKey(ch){
+      document.querySelectorAll('.finger').forEach(f=>f.classList.remove('active'));
+      (FINGERL[ch] ? hl : hr).querySelector('.'+(FINGERL[ch]||FINGERR[ch])).classList.add('active');
+    }
+    function tapKey(ch){
+      const f = (FINGERL[ch] ? hl : hr).querySelector('.'+(FINGERL[ch]||FINGERR[ch]));
+      f.classList.add('tap'); setTimeout(()=>f.classList.remove('tap'),120);
+    }
+    function catTo(ch){
+      const p = PKEY[ch];
+      cat.style.left = (p.offsetLeft + p.offsetWidth/2 - cat.offsetWidth/2) + 'px';
+    }
+    function flashKey(ch){
+      const p = PKEY[ch];
+      p.classList.add('down'); setTimeout(()=>p.classList.remove('down'), 160);
+    }
+    function renderStage(){
+      idx = 0; buildPips(STAGES[stage].length); showCurrent();
+    }
+    function showCurrent(){
+      const ch = STAGES[stage][idx];
+      keyEl.textContent = ch; keyEl.className = '';
+      document.querySelectorAll('.pkey').forEach(p=>p.classList.remove('lit'));
+      PKEY[ch].classList.add('lit'); catTo(ch); cueKey(ch);
+    }
+    function press(){
+      const seq = STAGES[stage], ch = seq[idx];
+      tapKey(ch); flashKey(ch);
+      note(NOTEF[ch], ac().currentTime, .38, 1.2);
+      markPip(idx);
+      idx++;
+      if(idx >= seq.length){
+        busy = true;
+        document.querySelectorAll('.pkey').forEach(p=>p.classList.remove('lit'));
+        document.querySelectorAll('.finger').forEach(f=>f.classList.remove('active'));
+        setTimeout(()=>playback(seq), 700);
+      } else showCurrent();
+    }
+    function playback(seq){                        // hear the tune she just played, up to speed
+      [...seq].forEach((ch, i)=>setTimeout(()=>{
+        flashKey(ch); catTo(ch);
+        note(NOTEF[ch], ac().currentTime, .32, 0.9);
+      }, i*280));
+      setTimeout(()=>{ chord(); squishBurst(); }, seq.length*280 + 250);
+      setTimeout(next, seq.length*280 + 2400);
+    }
+    function next(){
+      stage++;
+      if(stage >= STAGES.length){
+        stage = 0; round++; drawTicks();
+        localStorage.setItem('ada.rounds.'+SKEY, round);
+        sealBark.currentTime = 0; sealBark.play().catch(()=>{});
+        if(round >= 3){ graduate(); return; }
+      }
+      renderStage(); busy = false;
+    }
+
+    addEventListener('keydown',(e)=>{
+      if(busy || e.key.length!==1) return;
+      if(e.key.toLowerCase()===STAGES[stage][idx]) press();
+      else { keyEl.classList.remove('nope'); void keyEl.offsetWidth; keyEl.classList.add('nope'); }
+    });
+
+    // ---- arc-3 sounds: a glassy music box ----
+    let actx=null;
+    function ac(){ if(!actx) actx=new (window.AudioContext||window.webkitAudioContext)(); if(actx.state==='suspended') actx.resume(); return actx; }
+    function note(f, t, vol, len){
+      const c=ac();
+      [[f,vol,len],[f*3,vol*0.18,len*0.5]].forEach(([ff,v,l])=>{ const o=c.createOscillator(), g=c.createGain();
+        o.type='sine'; o.frequency.value=ff;
+        g.gain.setValueAtTime(.0001,t); g.gain.exponentialRampToValueAtTime(v,t+.006);
+        g.gain.exponentialRampToValueAtTime(.0001,t+l);
+        o.connect(g).connect(c.destination); o.start(t); o.stop(t+l+.05); });
+    }
+    function chord(){ const t=ac().currentTime; [523.25,659.25,783.99,1046.5].forEach((f,k)=>note(f, t+k*.06, .2, 2)); }
+
+    // ---- arc-3 celebration: balloons rise, confetti flutters ----
+    const cv=document.getElementById('squish'), cx=cv.getContext('2d');
+    function fit(){ cv.width=innerWidth; cv.height=innerHeight; }
+    addEventListener('resize',fit); fit();
+    const COLS=['#ffd23f','#ff6b9d','#2dd4bf','#a78bfa','#94a3b8','#f8fafc'];
+    let parts=[], raf=null;
+    function squishBurst(){
+      for(let i=0;i<9;i++) parts.push({ type:'b', x:Math.random()*innerWidth, y:innerHeight+40,
+        vy:-(1.8+Math.random()*1.8), r:16+Math.random()*14, c:COLS[(Math.random()*COLS.length)|0],
+        sway:Math.random()*6.28, born:performance.now() });
+      for(let i=0;i<44;i++) parts.push({ type:'c', x:innerWidth/2+(Math.random()-.5)*160, y:innerHeight*0.4,
+        vx:(Math.random()-.5)*16, vy:-Math.random()*9-2, w:9+Math.random()*8, h:5+Math.random()*4,
+        rot:Math.random()*6.28, vr:(Math.random()-.5)*0.45, c:COLS[(Math.random()*COLS.length)|0], born:performance.now() });
+      if(parts.length>160) parts.splice(0, parts.length-160);
+      if(!raf) loop();
+    }
+    function loop(){
+      cx.clearRect(0,0,cv.width,cv.height);
+      const nowT=performance.now();
+      parts=parts.filter(p=>{
+        if(p.type==='b'){ p.y+=p.vy; p.x+=Math.sin(nowT/500+p.sway)*0.7; return p.y>-70 && nowT-p.born<9000; }
+        p.vy+=0.22; p.vx*=0.99; p.x+=p.vx; p.y+=p.vy; p.rot+=p.vr;
+        return p.y<cv.height+30 && nowT-p.born<7000;
+      });
+      if(!parts.length){ raf=null; return; }
+      for(const p of parts){
+        cx.save();
+        if(p.type==='b'){
+          cx.translate(p.x,p.y); cx.fillStyle=p.c;
+          cx.beginPath(); cx.ellipse(0,0,p.r*0.82,p.r,0,0,7); cx.fill();
+          cx.beginPath(); cx.moveTo(0,p.r); cx.quadraticCurveTo(4,p.r+14,-2,p.r+26);
+          cx.strokeStyle='rgba(255,255,255,.6)'; cx.lineWidth=1.4; cx.stroke();
+          cx.fillStyle='rgba(255,255,255,.35)';
+          cx.beginPath(); cx.ellipse(-p.r*0.3,-p.r*0.35,p.r*0.2,p.r*0.28,0,0,7); cx.fill();
+        } else {
+          cx.translate(p.x,p.y); cx.rotate(p.rot);
+          cx.scale(1, Math.abs(Math.sin(nowT/180+p.rot))*0.8+0.2);
+          cx.fillStyle=p.c; cx.fillRect(-p.w/2,-p.h/2,p.w,p.h);
+        }
+        cx.restore();
+      }
+      raf=requestAnimationFrame(loop);
+    }
+
+    renderStage();
+  </script>
+</body>
+</html>

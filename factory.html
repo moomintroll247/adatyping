@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>squishy factory</title>
+  <style>
+    :root { --mt:#10b981; --mt-deep:#064e3b; --mt-bright:#6ee7b7; --cream:#fdfdfb; --gold:#ffd23f; }
+    * { box-sizing:border-box; margin:0; padding:0; }
+    html,body { height:100%; overflow:hidden; }
+    body { background:linear-gradient(160deg,#064e3b,#10b981 55%,#6ee7b7);
+           font-family:"Baloo 2","Comic Sans MS",system-ui,sans-serif; user-select:none; -webkit-user-select:none; touch-action:manipulation; }
+    #bg { position:fixed; inset:0; overflow:hidden; z-index:0; }
+    .bubble { position:absolute; bottom:-25vh; border-radius:50%;
+      background:radial-gradient(circle at 35% 30%,rgba(255,255,255,.45),rgba(255,255,255,.05)); animation:rise linear infinite; }
+    @keyframes rise { 0%{transform:translateY(0);opacity:0} 12%{opacity:.6} 88%{opacity:.6} 100%{transform:translateY(-135vh) translateX(var(--drift,0));opacity:0} }
+    #squish { position:fixed; inset:0; z-index:40; pointer-events:none; }
+    #toforest { position:fixed; top:2.5vh; left:2.5vw; z-index:60; width:13vmin; height:13vmin; border-radius:50%;
+      display:flex; align-items:center; justify-content:center; font-size:7vmin; text-decoration:none;
+      background:rgba(255,255,255,.2); border:.5vmin solid rgba(255,255,255,.5); }
+    #ver { position:fixed; right:8px; bottom:6px; z-index:100; font:13px/1 ui-monospace,monospace; color:rgba(255,255,255,.6); }
+    #stage { position:relative; z-index:10; height:100%; display:flex; flex-direction:column; align-items:center; justify-content:flex-end; gap:2.5vh; padding-bottom:2vh; }
+
+    /* ---- the factory line ---- */
+    #line { position:relative; width:74vmin; height:34vmin; }
+    #shelf { position:absolute; top:0; left:0; right:0; height:13vmin; border-bottom:1.2vmin solid #7a5230;
+      display:flex; align-items:flex-end; justify-content:center; gap:2vmin; }
+    .done-sq { width:9vmin; height:9vmin; border-radius:2.6vmin; position:relative;
+      animation:hopin .5s cubic-bezier(.2,1.5,.4,1); box-shadow:inset 0 -1.4vmin rgba(0,0,0,.15); }
+    @keyframes hopin { 0%{transform:translateY(14vmin) scale(.6)} 60%{transform:translateY(-1.6vmin)} 100%{transform:translateY(0) scale(1)} }
+    .done-sq.tip { animation:tipoff .7s ease-in forwards; }
+    @keyframes tipoff { 0%{transform:translateY(0) rotate(0)} 100%{transform:translateY(40vmin) rotate(140deg); opacity:0} }
+    #belt { position:absolute; bottom:0; left:0; right:0; height:4.5vmin; border-radius:2.2vmin;
+      background:repeating-linear-gradient(90deg, #334155 0 6vmin, #475569 6vmin 12vmin);
+      background-size:200% 100%; animation:beltmove 3s linear infinite; }
+    @keyframes beltmove { 0%{background-position:0 0} 100%{background-position:-24vmin 0} }
+    #sq { position:absolute; bottom:4.5vmin; left:50%; transform:translateX(-50%); width:15vmin; height:15vmin;
+      border-radius:4vmin; background:#cbd5e1; transform-origin:bottom center;
+      box-shadow:inset 0 -1.8vmin rgba(0,0,0,.15); transition:background .25s; }
+    #sq.flat { transform:translateX(-50%) scaleY(.35); }
+    #sq.inflate { animation:inflate .4s cubic-bezier(.2,1.6,.4,1) forwards; }
+    @keyframes inflate { 0%{transform:translateX(-50%) scaleY(.35)} 60%{transform:translateX(-50%) scaleY(1.15)} 100%{transform:translateX(-50%) scaleY(1)} }
+    #sq .eye { position:absolute; top:4.2vmin; width:1.9vmin; height:2.3vmin; background:#2a1133; border-radius:50%; display:none; }
+    #sq .e1 { left:3.6vmin; } #sq .e2 { right:3.6vmin; }
+    #sq .smile { position:absolute; left:50%; transform:translateX(-50%); bottom:3.4vmin; width:4.6vmin; height:2.3vmin;
+      border:.7vmin solid #2a1133; border-top:none; border-radius:0 0 5vmin 5vmin; display:none; }
+    #sq.faced .eye, #sq.faced .smile { display:block; }
+    #sq.hop { animation:hopoff .55s cubic-bezier(.3,1,.6,1) forwards; }
+    @keyframes hopoff { 0%{transform:translateX(-50%)} 100%{transform:translateX(-50%) translateY(-19vmin) scale(.62); opacity:0} }
+
+    #key { width:18vmin; height:18vmin; border-radius:24px; background:var(--cream);
+      display:flex; align-items:center; justify-content:center; font-size:11vmin; font-weight:800; color:var(--mt-deep);
+      box-shadow:0 1vmin 0 rgba(0,0,0,.25), inset 0 0 0 .7vmin var(--mt-bright); }
+    #key.nope { animation:nope .35s; }
+    @keyframes nope { 0%,100%{transform:translateX(0)} 25%{transform:translateX(-2vmin)} 75%{transform:translateX(2vmin)} }
+
+    .hand { position:relative; width:24vmin; height:30vmin; }
+    .hand.left { transform:scaleX(-1); }
+    #deck { display:flex; align-items:flex-end; gap:6vmin; }
+    #keycol { display:flex; flex-direction:column; align-items:center; gap:4vmin; }
+    #pips { display:flex; align-items:center; }
+    .pip { border-radius:50%; background:rgba(255,255,255,.18); border:.4vmin solid rgba(255,255,255,.5); }
+    .pip.on { animation:pippop .35s cubic-bezier(.2,1.5,.4,1) forwards; }
+    @keyframes pippop { 0%{transform:scale(.4)} 100%{transform:scale(1)} }
+    #ticks { position:fixed; top:2.5vh; right:2.5vw; z-index:60; display:flex; gap:1.5vmin; }
+    .tick { width:6.5vmin; height:6.5vmin; border-radius:50%; background:rgba(255,255,255,.15);
+      border:.5vmin solid rgba(255,255,255,.5); display:flex; align-items:center; justify-content:center; font-size:4vmin; }
+    .tick.done { background:rgba(255,210,63,.3); border-color:#ffd23f; }
+    #grad { position:fixed; inset:0; z-index:55; display:flex; align-items:center; justify-content:center; pointer-events:none; }
+    #gradcup { font-size:32vmin; animation:gradpop 1s cubic-bezier(.2,1.4,.4,1), gradbob 2.2s ease-in-out 1s infinite;
+      filter:drop-shadow(0 0 6vmin rgba(255,210,63,.8)); }
+    @keyframes gradpop { 0%{transform:scale(0) rotate(-20deg)} 100%{transform:scale(1) rotate(0)} }
+    @keyframes gradbob { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-3vmin)} }
+    #toforest.glow { border-color:#ffd23f; animation:tglow 1.2s ease-in-out infinite; }
+    @keyframes tglow { 0%,100%{box-shadow:0 0 2vmin rgba(255,210,63,.5)} 50%{box-shadow:0 0 7vmin rgba(255,210,63,.95)} }
+  </style>
+</head>
+<body>
+  <div id="bg"></div>
+  <a id="toforest" href="index.html?from=deep3" aria-label="forest">🌲</a>
+  <div id="ticks"></div>
+  <canvas id="squish"></canvas>
+  <main id="stage">
+    <div id="line">
+      <div id="shelf"></div>
+      <div id="sq" class="flat"><div class="eye e1"></div><div class="eye e2"></div><div class="smile"></div></div>
+      <div id="belt"></div>
+    </div>
+    <div id="deck">
+      <div class="hand left" id="hl"></div>
+      <div id="keycol"><div id="pips"></div><div id="key"></div></div>
+      <div class="hand" id="hr"></div>
+    </div>
+  </main>
+  <div id="ver">factory v1</div>
+
+  <script src="hand.js?v=5"></script>
+  <script>
+    buildHand(document.getElementById('hl'), {cuff:'#064e3b'});
+    buildHand(document.getElementById('hr'), {cuff:'#064e3b'});
+    // A flat squishy rolls in showing its letter. Press it THREE times:
+    // inflate → paint → face. It hops to the shelf. Fill the shelf, then... the tip.
+    const K8 = 'asdfjkl;';
+    const FINGERL = { a:'f-pinky', s:'f-ring', d:'f-middle', f:'f-index' };
+    const FINGERR = { j:'f-index', k:'f-middle', l:'f-ring', ';':'f-pinky' };
+    const PER_STAGE = [3, 4, 5];                   // squishies per stage (×3 presses each)
+    function randK(){ return K8[(Math.random()*K8.length)|0]; }
+    let stage = 0, sqNum = 0, phase = 0, ch = 'f', pressCount = 0, busy = false;
+    const keyEl = document.getElementById('key'), sq = document.getElementById('sq'),
+          shelf = document.getElementById('shelf'),
+          hl = document.getElementById('hl'), hr = document.getElementById('hr');
+    let sqColor = '#cbd5e1';
+
+    (function(){ const bg=document.getElementById('bg');
+      for(let i=0;i<12;i++){ const b=document.createElement('div'); b.className='bubble';
+        const s=6+Math.random()*16; b.style.width=b.style.height=s+'vmin'; b.style.left=Math.random()*100+'vw';
+        b.style.setProperty('--drift',(Math.random()*20-10)+'vw'); b.style.animationDuration=(14+Math.random()*14)+'s';
+        b.style.animationDelay=(-Math.random()*20)+'s'; bg.appendChild(b);} })();
+
+    const pipsEl = document.getElementById('pips');
+    function buildPips(n){ pipsEl.innerHTML=''; const sz=Math.min(4.2, 62/n); pipsEl.style.gap=Math.min(1.6, 12/n)+'vmin';
+      for(let i=0;i<n;i++){ const p=document.createElement('div'); p.className='pip'; p.style.width=p.style.height=sz+'vmin'; pipsEl.appendChild(p);} }
+    function markPip(i){ const p=pipsEl.children[i]; if(p){ p.classList.add('on'); p.style.background=COLS[i%COLS.length]; p.style.borderColor='rgba(255,255,255,.8)'; } }
+
+    const SKEY = 'factory';
+    const sealBark = new Audio('assets/seal.mp3'), sealCheer = new Audio('assets/seal_cheer.mp3');
+    let round = Math.min(3, +(localStorage.getItem('ada.rounds.'+SKEY)||0));
+    const ticksEl = document.getElementById('ticks');
+    function drawTicks(){ ticksEl.innerHTML='';
+      for(let i=0;i<3;i++){ const t=document.createElement('div'); t.className='tick'+(i<round?' done':'');
+        t.textContent=i<round?'⭐':''; ticksEl.appendChild(t); } }
+    function graduate(){
+      busy = true;
+      const g=document.createElement('div'); g.id='grad'; g.innerHTML='<div id="gradcup">🏆</div>';
+      document.body.appendChild(g);
+      document.getElementById('toforest').classList.add('glow');
+      sealCheer.currentTime = 0; sealCheer.play().catch(()=>{});
+      [0,700,1400].forEach(d=>setTimeout(()=>{ chord(); squishBurst(); }, d));
+    }
+    drawTicks();
+
+    function cueKey(c){
+      document.querySelectorAll('.finger').forEach(f=>f.classList.remove('active'));
+      (FINGERL[c] ? hl : hr).querySelector('.'+(FINGERL[c]||FINGERR[c])).classList.add('active');
+    }
+    function tapKey(c){
+      const f = (FINGERL[c] ? hl : hr).querySelector('.'+(FINGERL[c]||FINGERR[c]));
+      f.classList.add('tap'); setTimeout(()=>f.classList.remove('tap'),120);
+    }
+    function newSquishy(){
+      ch = randK(); phase = 0;
+      sq.className = 'flat'; sq.style.background = '#cbd5e1';
+      keyEl.textContent = ch; keyEl.className = ''; cueKey(ch);
+    }
+    function renderStage(){
+      shelf.innerHTML = ''; sqNum = 0; pressCount = 0;
+      buildPips(PER_STAGE[stage] * 3); newSquishy();
+    }
+    function press(){
+      tapKey(ch); tone(pressCount); markPip(pressCount); pressCount++;
+      phase++;
+      if(phase === 1){ sq.classList.remove('flat'); sq.classList.add('inflate'); }
+      else if(phase === 2){ sqColor = COLS[(Math.random()*COLS.length)|0]; sq.style.background = sqColor; }
+      else {
+        sq.classList.add('faced');
+        const done = document.createElement('div'); done.className='done-sq'; done.style.background = sqColor;
+        done.innerHTML = '<div style="position:absolute;top:2.4vmin;left:2.1vmin;width:1.2vmin;height:1.5vmin;background:#2a1133;border-radius:50%"></div>'
+          + '<div style="position:absolute;top:2.4vmin;right:2.1vmin;width:1.2vmin;height:1.5vmin;background:#2a1133;border-radius:50%"></div>'
+          + '<div style="position:absolute;bottom:2vmin;left:50%;transform:translateX(-50%);width:3vmin;height:1.5vmin;border:.5vmin solid #2a1133;border-top:none;border-radius:0 0 3vmin 3vmin"></div>';
+        busy = true;
+        sq.classList.add('hop');
+        setTimeout(()=>{ shelf.appendChild(done); sqNum++;
+          if(sqNum >= PER_STAGE[stage]) setTimeout(theTip, 800);
+          else { newSquishy(); busy = false; }
+        }, 480);
+      }
+    }
+    function theTip(){                             // the whole shelf tips into a celebration
+      [...shelf.children].forEach((d,i)=>setTimeout(()=>d.classList.add('tip'), i*120));
+      setTimeout(()=>{ chord(); squishBurst(); squishBurst(); }, 700);
+      setTimeout(next, 2800);
+    }
+    function next(){
+      stage++;
+      if(stage >= PER_STAGE.length){
+        stage = 0; round++; drawTicks();
+        localStorage.setItem('ada.rounds.'+SKEY, round);
+        sealBark.currentTime = 0; sealBark.play().catch(()=>{});
+        if(round >= 3){ graduate(); return; }
+      }
+      renderStage(); busy = false;
+    }
+
+    addEventListener('keydown',(e)=>{
+      if(busy || e.key.length!==1) return;
+      if(e.key.toLowerCase()===ch) press();
+      else { keyEl.classList.remove('nope'); void keyEl.offsetWidth; keyEl.classList.add('nope'); }
+    });
+
+    // ---- arc-3 sounds: music box ----
+    let actx=null;
+    function ac(){ if(!actx) actx=new (window.AudioContext||window.webkitAudioContext)(); if(actx.state==='suspended') actx.resume(); return actx; }
+    const BASE = 494, PENT=[1, 9/8, 5/4, 3/2, 5/3, 2];
+    function note(f, t, vol, len){
+      const c=ac();
+      [[f,vol,len],[f*3,vol*0.18,len*0.5]].forEach(([ff,v,l])=>{ const o=c.createOscillator(), g=c.createGain();
+        o.type='sine'; o.frequency.value=ff;
+        g.gain.setValueAtTime(.0001,t); g.gain.exponentialRampToValueAtTime(v,t+.006);
+        g.gain.exponentialRampToValueAtTime(.0001,t+l);
+        o.connect(g).connect(c.destination); o.start(t); o.stop(t+l+.05); });
+    }
+    function tone(n){ note(BASE * Math.pow(2, Math.floor(n/6)) * PENT[n%6], ac().currentTime, .33, 1.0); }
+    function chord(){ const t=ac().currentTime; [1,1.25,1.5,2].forEach((m,k)=>note(BASE*m, t+k*.06, .2, 1.8)); }
+
+    // ---- arc-3 celebration: balloons + confetti ----
+    const cv=document.getElementById('squish'), cx=cv.getContext('2d');
+    function fit(){ cv.width=innerWidth; cv.height=innerHeight; }
+    addEventListener('resize',fit); fit();
+    const COLS=['#6ee7b7','#34d399','#ffd23f','#ff6b9d','#a78bfa','#2dd4bf'];
+    let parts=[], raf=null;
+    function squishBurst(){
+      for(let i=0;i<9;i++) parts.push({ type:'b', x:Math.random()*innerWidth, y:innerHeight+40,
+        vy:-(1.8+Math.random()*1.8), r:16+Math.random()*14, c:COLS[(Math.random()*COLS.length)|0],
+        sway:Math.random()*6.28, born:performance.now() });
+      for(let i=0;i<44;i++) parts.push({ type:'c', x:innerWidth/2+(Math.random()-.5)*160, y:innerHeight*0.4,
+        vx:(Math.random()-.5)*16, vy:-Math.random()*9-2, w:9+Math.random()*8, h:5+Math.random()*4,
+        rot:Math.random()*6.28, vr:(Math.random()-.5)*0.45, c:COLS[(Math.random()*COLS.length)|0], born:performance.now() });
+      if(parts.length>160) parts.splice(0, parts.length-160);
+      if(!raf) loop();
+    }
+    function loop(){
+      cx.clearRect(0,0,cv.width,cv.height);
+      const nowT=performance.now();
+      parts=parts.filter(p=>{
+        if(p.type==='b'){ p.y+=p.vy; p.x+=Math.sin(nowT/500+p.sway)*0.7; return p.y>-70 && nowT-p.born<9000; }
+        p.vy+=0.22; p.vx*=0.99; p.x+=p.vx; p.y+=p.vy; p.rot+=p.vr;
+        return p.y<cv.height+30 && nowT-p.born<7000;
+      });
+      if(!parts.length){ raf=null; return; }
+      for(const p of parts){
+        cx.save();
+        if(p.type==='b'){
+          cx.translate(p.x,p.y); cx.fillStyle=p.c;
+          cx.beginPath(); cx.ellipse(0,0,p.r*0.82,p.r,0,0,7); cx.fill();
+          cx.beginPath(); cx.moveTo(0,p.r); cx.quadraticCurveTo(4,p.r+14,-2,p.r+26);
+          cx.strokeStyle='rgba(255,255,255,.6)'; cx.lineWidth=1.4; cx.stroke();
+          cx.fillStyle='rgba(255,255,255,.35)';
+          cx.beginPath(); cx.ellipse(-p.r*0.3,-p.r*0.35,p.r*0.2,p.r*0.28,0,0,7); cx.fill();
+        } else {
+          cx.translate(p.x,p.y); cx.rotate(p.rot);
+          cx.scale(1, Math.abs(Math.sin(nowT/180+p.rot))*0.8+0.2);
+          cx.fillStyle=p.c; cx.fillRect(-p.w/2,-p.h/2,p.w,p.h);
+        }
+        cx.restore();
+      }
+      raf=requestAnimationFrame(loop);
+    }
+
+    renderStage();
+  </script>
+</body>
+</html>

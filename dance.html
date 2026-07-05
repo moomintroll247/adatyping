@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>dance party</title>
+  <style>
+    :root { --dp:#7c3aed; --dp-deep:#312e81; --dp-bright:#c4b5fd; --cream:#fdfdfb; --gold:#ffd23f; }
+    * { box-sizing:border-box; margin:0; padding:0; }
+    html,body { height:100%; overflow:hidden; }
+    body { background:linear-gradient(160deg,#312e81,#7c3aed 55%,#ec4899);
+           font-family:"Baloo 2","Comic Sans MS",system-ui,sans-serif; user-select:none; -webkit-user-select:none; touch-action:manipulation; }
+    #bg { position:fixed; inset:0; overflow:hidden; z-index:0; }
+    .twinkle { position:absolute; border-radius:50%; background:#fff; animation:tk ease-in-out infinite; }
+    @keyframes tk { 0%,100%{opacity:.15; transform:scale(.7)} 50%{opacity:.8; transform:scale(1.15)} }
+    #squish { position:fixed; inset:0; z-index:40; pointer-events:none; }
+    #toforest { position:fixed; top:2.5vh; left:2.5vw; z-index:60; width:13vmin; height:13vmin; border-radius:50%;
+      display:flex; align-items:center; justify-content:center; font-size:7vmin; text-decoration:none;
+      background:rgba(255,255,255,.2); border:.5vmin solid rgba(255,255,255,.5); }
+    #ver { position:fixed; right:8px; bottom:6px; z-index:100; font:13px/1 ui-monospace,monospace; color:rgba(255,255,255,.6); }
+    #stage { position:relative; z-index:10; height:100%; display:flex; flex-direction:column; align-items:center; justify-content:flex-end; gap:2.5vh; padding-bottom:2vh; }
+
+    /* ---- the dance floor ---- */
+    #club { position:relative; width:64vmin; height:34vmin; display:flex; align-items:flex-end; justify-content:center; }
+    #ball { position:absolute; top:0; left:50%; transform:translateX(-50%); font-size:8vmin; line-height:1; animation:ballspin 5s linear infinite; }
+    @keyframes ballspin { 0%{transform:translateX(-50%) rotate(0)} 100%{transform:translateX(-50%) rotate(360deg)} }
+    #dancer { font-size:17vmin; line-height:1; }
+    #floor { position:absolute; bottom:-1vmin; left:50%; transform:translateX(-50%); width:44vmin; height:4vmin;
+      border-radius:50%; background:radial-gradient(ellipse, rgba(255,255,255,.35), rgba(255,255,255,.05)); transition:background .2s; }
+    .m-arms { animation:mArms .45s ease-in-out; } .m-hips { animation:mHips .45s ease-in-out; }
+    .m-kick { animation:mKick .45s ease-in-out; } .m-jazz { animation:mJazz .5s ease-in-out; }
+    @keyframes mArms { 0%,100%{transform:rotate(0)} 30%{transform:rotate(-16deg)} 70%{transform:rotate(14deg)} }
+    @keyframes mHips { 0%,100%{transform:translateX(0)} 25%{transform:translateX(-2.6vmin)} 75%{transform:translateX(2.6vmin)} }
+    @keyframes mKick { 0%,100%{transform:translateY(0) rotate(0)} 45%{transform:translateY(-4.5vmin) rotate(22deg)} }
+    @keyframes mJazz { 0%,100%{transform:scale(1) rotate(0)} 50%{transform:scale(1.22) rotate(-10deg)} }
+
+    #key { width:18vmin; height:18vmin; border-radius:24px; background:var(--cream);
+      display:flex; align-items:center; justify-content:center; font-size:11vmin; font-weight:800; color:var(--dp-deep);
+      box-shadow:0 1vmin 0 rgba(0,0,0,.25), inset 0 0 0 .7vmin var(--dp-bright); }
+    #key.nope { animation:nope .35s; }
+    @keyframes nope { 0%,100%{transform:translateX(0)} 25%{transform:translateX(-2vmin)} 75%{transform:translateX(2vmin)} }
+
+    .hand { position:relative; width:24vmin; height:30vmin; }
+    .hand.left { transform:scaleX(-1); }
+    #deck { display:flex; align-items:flex-end; gap:6vmin; }
+    #keycol { display:flex; flex-direction:column; align-items:center; gap:4vmin; }
+    #pips { display:flex; align-items:center; }
+    .pip { border-radius:50%; background:rgba(255,255,255,.18); border:.4vmin solid rgba(255,255,255,.5); }
+    .pip.on { animation:pippop .35s cubic-bezier(.2,1.5,.4,1) forwards; }
+    @keyframes pippop { 0%{transform:scale(.4)} 100%{transform:scale(1)} }
+    #ticks { position:fixed; top:2.5vh; right:2.5vw; z-index:60; display:flex; gap:1.5vmin; }
+    .tick { width:6.5vmin; height:6.5vmin; border-radius:50%; background:rgba(255,255,255,.15);
+      border:.5vmin solid rgba(255,255,255,.5); display:flex; align-items:center; justify-content:center; font-size:4vmin; }
+    .tick.done { background:rgba(255,210,63,.3); border-color:#ffd23f; }
+    #grad { position:fixed; inset:0; z-index:55; display:flex; align-items:center; justify-content:center; pointer-events:none; }
+    #gradcup { font-size:32vmin; animation:gradpop 1s cubic-bezier(.2,1.4,.4,1), gradbob 2.2s ease-in-out 1s infinite;
+      filter:drop-shadow(0 0 6vmin rgba(255,210,63,.8)); }
+    @keyframes gradpop { 0%{transform:scale(0) rotate(-20deg)} 100%{transform:scale(1) rotate(0)} }
+    @keyframes gradbob { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-3vmin)} }
+    #toforest.glow { border-color:#ffd23f; animation:tglow 1.2s ease-in-out infinite; }
+    @keyframes tglow { 0%,100%{box-shadow:0 0 2vmin rgba(255,210,63,.5)} 50%{box-shadow:0 0 7vmin rgba(255,210,63,.95)} }
+  </style>
+</head>
+<body>
+  <div id="bg"></div>
+  <a id="toforest" href="index.html?from=deep3" aria-label="forest">🌲</a>
+  <div id="ticks"></div>
+  <canvas id="squish"></canvas>
+  <main id="stage">
+    <div id="club">
+      <div id="ball">🪩</div>
+      <div id="dancer">🦝</div>
+      <div id="floor"></div>
+    </div>
+    <div id="deck">
+      <div class="hand left" id="hl"></div>
+      <div id="keycol"><div id="pips"></div><div id="key"></div></div>
+      <div class="hand" id="hr"></div>
+    </div>
+  </main>
+  <div id="ver">dance v1</div>
+
+  <script src="hand.js?v=5"></script>
+  <script>
+    buildHand(document.getElementById('hl'), {cuff:'#312e81'});
+    buildHand(document.getElementById('hr'), {cuff:'#312e81'});
+    // Every key is a dance move: f/j arms, d/k hips, s/l kicks, a/; jazz hands.
+    // Build the routine one press at a time — then it replays with the lights up.
+    const K8 = 'asdfjkl;';
+    const MOVE = { f:'m-arms', j:'m-arms', d:'m-hips', k:'m-hips', s:'m-kick', l:'m-kick', a:'m-jazz', ';':'m-jazz' };
+    const FINGERL = { a:'f-pinky', s:'f-ring', d:'f-middle', f:'f-index' };
+    const FINGERR = { j:'f-index', k:'f-middle', l:'f-ring', ';':'f-pinky' };
+    function randOf(set, n){ let s=''; for(let i=0;i<n;i++) s+=set[(Math.random()*set.length)|0]; return s; }
+    function makeStages(){ return [randOf(K8,6), randOf(K8,8), randOf(K8,10)]; }
+    let STAGES = makeStages();
+    let stage = 0, idx = 0, busy = false;
+    const keyEl = document.getElementById('key'), dancer = document.getElementById('dancer'),
+          floor = document.getElementById('floor'),
+          hl = document.getElementById('hl'), hr = document.getElementById('hr');
+
+    (function(){ const bg=document.getElementById('bg');
+      for(let i=0;i<26;i++){ const t=document.createElement('div'); t.className='twinkle';
+        const s=.5+Math.random()*1.1; t.style.width=t.style.height=s+'vmin';
+        t.style.left=Math.random()*100+'vw'; t.style.top=Math.random()*100+'vh';
+        t.style.animationDuration=(1.6+Math.random()*2.4)+'s'; t.style.animationDelay=(-Math.random()*3)+'s';
+        bg.appendChild(t);} })();
+
+    const pipsEl = document.getElementById('pips');
+    function buildPips(n){ pipsEl.innerHTML=''; const sz=Math.min(4.5, 62/n); pipsEl.style.gap=Math.min(1.8, 12/n)+'vmin';
+      for(let i=0;i<n;i++){ const p=document.createElement('div'); p.className='pip'; p.style.width=p.style.height=sz+'vmin'; pipsEl.appendChild(p);} }
+    function markPip(i){ const p=pipsEl.children[i]; if(p){ p.classList.add('on'); p.style.background=COLS[i%COLS.length]; p.style.borderColor='rgba(255,255,255,.8)'; } }
+
+    const SKEY = 'dance';
+    const sealBark = new Audio('assets/seal.mp3'), sealCheer = new Audio('assets/seal_cheer.mp3');
+    let round = Math.min(3, +(localStorage.getItem('ada.rounds.'+SKEY)||0));
+    const ticksEl = document.getElementById('ticks');
+    function drawTicks(){ ticksEl.innerHTML='';
+      for(let i=0;i<3;i++){ const t=document.createElement('div'); t.className='tick'+(i<round?' done':'');
+        t.textContent=i<round?'⭐':''; ticksEl.appendChild(t); } }
+    function graduate(){
+      busy = true;
+      const g=document.createElement('div'); g.id='grad'; g.innerHTML='<div id="gradcup">🏆</div>';
+      document.body.appendChild(g);
+      document.getElementById('toforest').classList.add('glow');
+      sealCheer.currentTime = 0; sealCheer.play().catch(()=>{});
+      [0,700,1400].forEach(d=>setTimeout(()=>{ chord(); squishBurst(); }, d));
+    }
+    drawTicks();
+
+    function cueKey(ch){
+      document.querySelectorAll('.finger').forEach(f=>f.classList.remove('active'));
+      (FINGERL[ch] ? hl : hr).querySelector('.'+(FINGERL[ch]||FINGERR[ch])).classList.add('active');
+    }
+    function tapKey(ch){
+      const f = (FINGERL[ch] ? hl : hr).querySelector('.'+(FINGERL[ch]||FINGERR[ch]));
+      f.classList.add('tap'); setTimeout(()=>f.classList.remove('tap'),120);
+    }
+    function doMove(ch){
+      dancer.className=''; void dancer.offsetWidth; dancer.className = MOVE[ch];
+      floor.style.background = `radial-gradient(ellipse, ${COLS[(Math.random()*COLS.length)|0]}55, rgba(255,255,255,.05))`;
+    }
+    function renderStage(){ idx = 0; buildPips(STAGES[stage].length); showCurrent(); }
+    function showCurrent(){
+      const ch = STAGES[stage][idx];
+      keyEl.textContent = ch; keyEl.className = '';
+      cueKey(ch);
+    }
+    function press(){
+      const seq = STAGES[stage], ch = seq[idx];
+      tapKey(ch); doMove(ch);
+      tone(idx); markPip(idx);
+      idx++;
+      if(idx >= seq.length){
+        busy = true;
+        document.querySelectorAll('.finger').forEach(f=>f.classList.remove('active'));
+        setTimeout(()=>replay(seq), 700);
+      } else showCurrent();
+    }
+    function replay(seq){                          // the routine, back-to-back, lights up
+      [...seq].forEach((ch, i)=>setTimeout(()=>{ doMove(ch); tone(i); }, i*300));
+      setTimeout(()=>{ chord(); squishBurst(); }, seq.length*300 + 250);
+      setTimeout(next, seq.length*300 + 2400);
+    }
+    function next(){
+      stage++;
+      if(stage >= STAGES.length){
+        stage = 0; round++; drawTicks();
+        localStorage.setItem('ada.rounds.'+SKEY, round);
+        sealBark.currentTime = 0; sealBark.play().catch(()=>{});
+        if(round >= 3){ graduate(); return; }
+        STAGES = makeStages();
+      }
+      renderStage(); busy = false;
+    }
+
+    addEventListener('keydown',(e)=>{
+      if(busy || e.key.length!==1) return;
+      if(e.key.toLowerCase()===STAGES[stage][idx]) press();
+      else { keyEl.classList.remove('nope'); void keyEl.offsetWidth; keyEl.classList.add('nope'); }
+    });
+
+    // ---- arc-3 sounds: music box ----
+    let actx=null;
+    function ac(){ if(!actx) actx=new (window.AudioContext||window.webkitAudioContext)(); if(actx.state==='suspended') actx.resume(); return actx; }
+    const BASE = 587, PENT=[1, 9/8, 5/4, 3/2, 5/3, 2];
+    function note(f, t, vol, len){
+      const c=ac();
+      [[f,vol,len],[f*3,vol*0.18,len*0.5]].forEach(([ff,v,l])=>{ const o=c.createOscillator(), g=c.createGain();
+        o.type='sine'; o.frequency.value=ff;
+        g.gain.setValueAtTime(.0001,t); g.gain.exponentialRampToValueAtTime(v,t+.006);
+        g.gain.exponentialRampToValueAtTime(.0001,t+l);
+        o.connect(g).connect(c.destination); o.start(t); o.stop(t+l+.05); });
+    }
+    function tone(n){ note(BASE * Math.pow(2, Math.floor(n/6)) * PENT[n%6], ac().currentTime, .33, 1.0); }
+    function chord(){ const t=ac().currentTime; [1,1.25,1.5,2].forEach((m,k)=>note(BASE*m, t+k*.06, .2, 1.8)); }
+
+    // ---- arc-3 celebration: balloons + confetti ----
+    const cv=document.getElementById('squish'), cx=cv.getContext('2d');
+    function fit(){ cv.width=innerWidth; cv.height=innerHeight; }
+    addEventListener('resize',fit); fit();
+    const COLS=['#ec4899','#a78bfa','#ffd23f','#2dd4bf','#f472b6','#c4b5fd'];
+    let parts=[], raf=null;
+    function squishBurst(){
+      for(let i=0;i<9;i++) parts.push({ type:'b', x:Math.random()*innerWidth, y:innerHeight+40,
+        vy:-(1.8+Math.random()*1.8), r:16+Math.random()*14, c:COLS[(Math.random()*COLS.length)|0],
+        sway:Math.random()*6.28, born:performance.now() });
+      for(let i=0;i<44;i++) parts.push({ type:'c', x:innerWidth/2+(Math.random()-.5)*160, y:innerHeight*0.4,
+        vx:(Math.random()-.5)*16, vy:-Math.random()*9-2, w:9+Math.random()*8, h:5+Math.random()*4,
+        rot:Math.random()*6.28, vr:(Math.random()-.5)*0.45, c:COLS[(Math.random()*COLS.length)|0], born:performance.now() });
+      if(parts.length>160) parts.splice(0, parts.length-160);
+      if(!raf) loop();
+    }
+    function loop(){
+      cx.clearRect(0,0,cv.width,cv.height);
+      const nowT=performance.now();
+      parts=parts.filter(p=>{
+        if(p.type==='b'){ p.y+=p.vy; p.x+=Math.sin(nowT/500+p.sway)*0.7; return p.y>-70 && nowT-p.born<9000; }
+        p.vy+=0.22; p.vx*=0.99; p.x+=p.vx; p.y+=p.vy; p.rot+=p.vr;
+        return p.y<cv.height+30 && nowT-p.born<7000;
+      });
+      if(!parts.length){ raf=null; return; }
+      for(const p of parts){
+        cx.save();
+        if(p.type==='b'){
+          cx.translate(p.x,p.y); cx.fillStyle=p.c;
+          cx.beginPath(); cx.ellipse(0,0,p.r*0.82,p.r,0,0,7); cx.fill();
+          cx.beginPath(); cx.moveTo(0,p.r); cx.quadraticCurveTo(4,p.r+14,-2,p.r+26);
+          cx.strokeStyle='rgba(255,255,255,.6)'; cx.lineWidth=1.4; cx.stroke();
+          cx.fillStyle='rgba(255,255,255,.35)';
+          cx.beginPath(); cx.ellipse(-p.r*0.3,-p.r*0.35,p.r*0.2,p.r*0.28,0,0,7); cx.fill();
+        } else {
+          cx.translate(p.x,p.y); cx.rotate(p.rot);
+          cx.scale(1, Math.abs(Math.sin(nowT/180+p.rot))*0.8+0.2);
+          cx.fillStyle=p.c; cx.fillRect(-p.w/2,-p.h/2,p.w,p.h);
+        }
+        cx.restore();
+      }
+      raf=requestAnimationFrame(loop);
+    }
+
+    renderStage();
+  </script>
+</body>
+</html>

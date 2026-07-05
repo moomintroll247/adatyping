@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>bubble fashion show</title>
+  <style>
+    :root { --bp:#ec4899; --bp-deep:#9d174d; --bp-bright:#f9a8d4; --cream:#fdfdfb; --gold:#ffd23f; }
+    * { box-sizing:border-box; margin:0; padding:0; }
+    html,body { height:100%; overflow:hidden; }
+    body { background:linear-gradient(160deg,#9d174d,#ec4899 55%,#f9a8d4);
+           font-family:"Baloo 2","Comic Sans MS",system-ui,sans-serif; user-select:none; -webkit-user-select:none; touch-action:manipulation; }
+    #bg { position:fixed; inset:0; overflow:hidden; z-index:0; }
+    .bubble { position:absolute; bottom:-25vh; border-radius:50%;
+      background:radial-gradient(circle at 35% 30%,rgba(255,255,255,.5),rgba(255,255,255,.05)); animation:rise linear infinite; }
+    @keyframes rise { 0%{transform:translateY(0);opacity:0} 12%{opacity:.7} 88%{opacity:.7} 100%{transform:translateY(-135vh) translateX(var(--drift,0));opacity:0} }
+    #flash { position:fixed; inset:0; background:#fff; opacity:0; pointer-events:none; z-index:50; }
+    #flash.go { animation:flashes 1.6s linear; }
+    @keyframes flashes { 0%,12%,26%,42%,100%{opacity:0} 6%,19%,34%{opacity:.75} }
+    #squish { position:fixed; inset:0; z-index:40; pointer-events:none; }
+    #toforest { position:fixed; top:2.5vh; left:2.5vw; z-index:60; width:13vmin; height:13vmin; border-radius:50%;
+      display:flex; align-items:center; justify-content:center; font-size:7vmin; text-decoration:none;
+      background:rgba(255,255,255,.2); border:.5vmin solid rgba(255,255,255,.5); }
+    #ver { position:fixed; right:8px; bottom:6px; z-index:100; font:13px/1 ui-monospace,monospace; color:rgba(255,255,255,.6); }
+    #stage { position:relative; z-index:10; height:100%; display:flex; flex-direction:column; align-items:center; justify-content:flex-end; gap:2.5vh; padding-bottom:2vh; }
+
+    /* ---- the runway model and her growing outfit ---- */
+    #runway { position:relative; width:70vmin; height:32vmin; }
+    #model { position:absolute; bottom:0; left:50%; transform:translateX(-50%); font-size:17vmin; line-height:1; transition:left 1.4s ease-in-out; }
+    #model.strut { animation:strut .6s ease-in-out infinite; }
+    @keyframes strut { 0%,100%{margin-bottom:0} 50%{margin-bottom:1.6vmin} }
+    .item { position:absolute; font-size:8vmin; line-height:1; transform:scale(0); animation:itemin .5s cubic-bezier(.2,1.6,.4,1) forwards; }
+    @keyframes itemin { 0%{transform:scale(0) translateY(-14vmin) rotate(-30deg)} 100%{transform:scale(1) translateY(0) rotate(0)} }
+
+    /* the letter arrives inside a floating soap bubble */
+    #key { width:19vmin; height:19vmin; border-radius:50%;
+      background:radial-gradient(circle at 32% 28%, rgba(255,255,255,.75), rgba(255,255,255,.14));
+      border:.6vmin solid rgba(255,255,255,.75);
+      display:flex; align-items:center; justify-content:center; font-size:10vmin; font-weight:800; color:var(--bp-deep);
+      animation:bob 2.4s ease-in-out infinite; }
+    @keyframes bob { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-1.8vmin)} }
+    #key.nope { animation:nope .35s; }
+    @keyframes nope { 0%,100%{transform:translateX(0)} 25%{transform:translateX(-2vmin)} 75%{transform:translateX(2vmin)} }
+    #key.popt { animation:popt .3s ease-out; }
+    @keyframes popt { 0%{transform:scale(1)} 60%{transform:scale(1.35); opacity:.4} 100%{transform:scale(1); opacity:1} }
+
+    .hand { position:relative; width:24vmin; height:30vmin; }
+    .hand.left { transform:scaleX(-1); }
+    #deck { display:flex; align-items:flex-end; gap:6vmin; }
+    #keycol { display:flex; flex-direction:column; align-items:center; gap:4vmin; }
+    #pips { display:flex; align-items:center; }
+    .pip { border-radius:50%; background:rgba(255,255,255,.18); border:.4vmin solid rgba(255,255,255,.5); }
+    .pip.on { animation:pippop .35s cubic-bezier(.2,1.5,.4,1) forwards; }
+    @keyframes pippop { 0%{transform:scale(.4)} 100%{transform:scale(1)} }
+    #ticks { position:fixed; top:2.5vh; right:2.5vw; z-index:60; display:flex; gap:1.5vmin; }
+    .tick { width:6.5vmin; height:6.5vmin; border-radius:50%; background:rgba(255,255,255,.15);
+      border:.5vmin solid rgba(255,255,255,.5); display:flex; align-items:center; justify-content:center; font-size:4vmin; }
+    .tick.done { background:rgba(255,210,63,.3); border-color:#ffd23f; }
+    #grad { position:fixed; inset:0; z-index:55; display:flex; align-items:center; justify-content:center; pointer-events:none; }
+    #gradcup { font-size:32vmin; animation:gradpop 1s cubic-bezier(.2,1.4,.4,1), gradbob 2.2s ease-in-out 1s infinite;
+      filter:drop-shadow(0 0 6vmin rgba(255,210,63,.8)); }
+    @keyframes gradpop { 0%{transform:scale(0) rotate(-20deg)} 100%{transform:scale(1) rotate(0)} }
+    @keyframes gradbob { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-3vmin)} }
+    #toforest.glow { border-color:#ffd23f; animation:tglow 1.2s ease-in-out infinite; }
+    @keyframes tglow { 0%,100%{box-shadow:0 0 2vmin rgba(255,210,63,.5)} 50%{box-shadow:0 0 7vmin rgba(255,210,63,.95)} }
+  </style>
+</head>
+<body>
+  <div id="bg"></div>
+  <div id="flash"></div>
+  <a id="toforest" href="index.html?from=deep3" aria-label="forest">🌲</a>
+  <div id="ticks"></div>
+  <canvas id="squish"></canvas>
+  <main id="stage">
+    <div id="runway"><div id="model">🦛</div></div>
+    <div id="deck">
+      <div class="hand left" id="hl"></div>
+      <div id="keycol"><div id="pips"></div><div id="key"></div></div>
+      <div class="hand" id="hr"></div>
+    </div>
+  </main>
+  <div id="ver">fashion v1</div>
+
+  <script src="hand.js?v=5"></script>
+  <script>
+    buildHand(document.getElementById('hl'), {cuff:'#9d174d'});
+    buildHand(document.getElementById('hr'), {cuff:'#9d174d'});
+    // A soap bubble floats in holding a letter. Pop it (press the key!) and a fashion
+    // item lands on the model. Full outfit = catwalk strut with camera flashes.
+    const K8 = 'asdfjkl;';
+    const ITEMS = ['👒','🕶️','🧣','👗','💍','👢','🎀','👜'];
+    const SLOTS = [[50,-2],[38,26],[64,30],[36,58],[66,62],[30,42],[70,14],[62,84]];  // [%left, %top] around the model
+    const FINGERL = { a:'f-pinky', s:'f-ring', d:'f-middle', f:'f-index' };
+    const FINGERR = { j:'f-index', k:'f-middle', l:'f-ring', ';':'f-pinky' };
+    function randOf(set, n){ let s=''; for(let i=0;i<n;i++) s+=set[(Math.random()*set.length)|0]; return s; }
+    function makeStages(){ return [randOf(K8,5), randOf(K8,6), randOf(K8,8)]; }
+    let STAGES = makeStages();
+    let stage = 0, idx = 0, busy = false;
+    const keyEl = document.getElementById('key'), runway = document.getElementById('runway'),
+          model = document.getElementById('model'), flash = document.getElementById('flash'),
+          hl = document.getElementById('hl'), hr = document.getElementById('hr');
+
+    (function(){ const bg=document.getElementById('bg');
+      for(let i=0;i<12;i++){ const b=document.createElement('div'); b.className='bubble';
+        const s=6+Math.random()*16; b.style.width=b.style.height=s+'vmin'; b.style.left=Math.random()*100+'vw';
+        b.style.setProperty('--drift',(Math.random()*20-10)+'vw'); b.style.animationDuration=(14+Math.random()*14)+'s';
+        b.style.animationDelay=(-Math.random()*20)+'s'; bg.appendChild(b);} })();
+
+    const pipsEl = document.getElementById('pips');
+    function buildPips(n){ pipsEl.innerHTML=''; const sz=Math.min(4.5, 62/n); pipsEl.style.gap=Math.min(1.8, 12/n)+'vmin';
+      for(let i=0;i<n;i++){ const p=document.createElement('div'); p.className='pip'; p.style.width=p.style.height=sz+'vmin'; pipsEl.appendChild(p);} }
+    function markPip(i){ const p=pipsEl.children[i]; if(p){ p.classList.add('on'); p.style.background=COLS[i%COLS.length]; p.style.borderColor='rgba(255,255,255,.8)'; } }
+
+    const SKEY = 'fashion';
+    const sealBark = new Audio('assets/seal.mp3'), sealCheer = new Audio('assets/seal_cheer.mp3');
+    let round = Math.min(3, +(localStorage.getItem('ada.rounds.'+SKEY)||0));
+    const ticksEl = document.getElementById('ticks');
+    function drawTicks(){ ticksEl.innerHTML='';
+      for(let i=0;i<3;i++){ const t=document.createElement('div'); t.className='tick'+(i<round?' done':'');
+        t.textContent=i<round?'⭐':''; ticksEl.appendChild(t); } }
+    function graduate(){
+      busy = true;
+      const g=document.createElement('div'); g.id='grad'; g.innerHTML='<div id="gradcup">🏆</div>';
+      document.body.appendChild(g);
+      document.getElementById('toforest').classList.add('glow');
+      sealCheer.currentTime = 0; sealCheer.play().catch(()=>{});
+      [0,700,1400].forEach(d=>setTimeout(()=>{ chord(); squishBurst(); }, d));
+    }
+    drawTicks();
+
+    function cueKey(ch){
+      document.querySelectorAll('.finger').forEach(f=>f.classList.remove('active'));
+      (FINGERL[ch] ? hl : hr).querySelector('.'+(FINGERL[ch]||FINGERR[ch])).classList.add('active');
+    }
+    function tapKey(ch){
+      const f = (FINGERL[ch] ? hl : hr).querySelector('.'+(FINGERL[ch]||FINGERR[ch]));
+      f.classList.add('tap'); setTimeout(()=>f.classList.remove('tap'),120);
+    }
+    function renderStage(){
+      runway.querySelectorAll('.item').forEach(e=>e.remove());
+      model.style.left='50%'; model.classList.remove('strut');
+      idx = 0; buildPips(STAGES[stage].length); showCurrent();
+    }
+    function showCurrent(){
+      const ch = STAGES[stage][idx];
+      keyEl.textContent = ch; keyEl.classList.remove('nope','popt');
+      cueKey(ch);
+    }
+    function press(){
+      const seq = STAGES[stage], ch = seq[idx];
+      tapKey(ch);
+      keyEl.classList.remove('popt'); void keyEl.offsetWidth; keyEl.classList.add('popt');
+      const it = document.createElement('div'); it.className='item';
+      it.textContent = ITEMS[idx % ITEMS.length];
+      const [lx, ty] = SLOTS[idx % SLOTS.length];
+      it.style.left = lx+'%'; it.style.top = ty+'%'; it.style.transform+='';
+      runway.appendChild(it);
+      tone(idx); markPip(idx);
+      idx++;
+      if(idx >= seq.length){
+        busy = true;
+        document.querySelectorAll('.finger').forEach(f=>f.classList.remove('active'));
+        setTimeout(catwalk, 600);
+      } else showCurrent();
+    }
+    function catwalk(){                            // strut the finished look, cameras popping
+      model.classList.add('strut');
+      flash.classList.remove('go'); void flash.offsetWidth; flash.classList.add('go');
+      model.style.left='22%';
+      setTimeout(()=>{ model.style.left='78%'; }, 1500);
+      setTimeout(()=>{ model.style.left='50%'; chord(); squishBurst(); }, 3000);
+      setTimeout(next, 4600);
+    }
+    function next(){
+      stage++;
+      if(stage >= STAGES.length){
+        stage = 0; round++; drawTicks();
+        localStorage.setItem('ada.rounds.'+SKEY, round);
+        sealBark.currentTime = 0; sealBark.play().catch(()=>{});
+        if(round >= 3){ graduate(); return; }
+        STAGES = makeStages();
+      }
+      renderStage(); busy = false;
+    }
+
+    addEventListener('keydown',(e)=>{
+      if(busy || e.key.length!==1) return;
+      if(e.key.toLowerCase()===STAGES[stage][idx]) press();
+      else { keyEl.classList.remove('nope'); void keyEl.offsetWidth; keyEl.classList.add('nope'); }
+    });
+
+    // ---- arc-3 sounds: music box ----
+    let actx=null;
+    function ac(){ if(!actx) actx=new (window.AudioContext||window.webkitAudioContext)(); if(actx.state==='suspended') actx.resume(); return actx; }
+    const BASE = 659, PENT=[1, 9/8, 5/4, 3/2, 5/3, 2];
+    function note(f, t, vol, len){
+      const c=ac();
+      [[f,vol,len],[f*3,vol*0.18,len*0.5]].forEach(([ff,v,l])=>{ const o=c.createOscillator(), g=c.createGain();
+        o.type='sine'; o.frequency.value=ff;
+        g.gain.setValueAtTime(.0001,t); g.gain.exponentialRampToValueAtTime(v,t+.006);
+        g.gain.exponentialRampToValueAtTime(.0001,t+l);
+        o.connect(g).connect(c.destination); o.start(t); o.stop(t+l+.05); });
+    }
+    function tone(n){ note(BASE * Math.pow(2, Math.floor(n/6)) * PENT[n%6], ac().currentTime, .33, 1.0); }
+    function chord(){ const t=ac().currentTime; [1,1.25,1.5,2].forEach((m,k)=>note(BASE*m, t+k*.06, .2, 1.8)); }
+
+    // ---- arc-3 celebration: balloons + confetti ----
+    const cv=document.getElementById('squish'), cx=cv.getContext('2d');
+    function fit(){ cv.width=innerWidth; cv.height=innerHeight; }
+    addEventListener('resize',fit); fit();
+    const COLS=['#f9a8d4','#ec4899','#ffd23f','#a78bfa','#fdfdfb','#f472b6'];
+    let parts=[], raf=null;
+    function squishBurst(){
+      for(let i=0;i<9;i++) parts.push({ type:'b', x:Math.random()*innerWidth, y:innerHeight+40,
+        vy:-(1.8+Math.random()*1.8), r:16+Math.random()*14, c:COLS[(Math.random()*COLS.length)|0],
+        sway:Math.random()*6.28, born:performance.now() });
+      for(let i=0;i<44;i++) parts.push({ type:'c', x:innerWidth/2+(Math.random()-.5)*160, y:innerHeight*0.4,
+        vx:(Math.random()-.5)*16, vy:-Math.random()*9-2, w:9+Math.random()*8, h:5+Math.random()*4,
+        rot:Math.random()*6.28, vr:(Math.random()-.5)*0.45, c:COLS[(Math.random()*COLS.length)|0], born:performance.now() });
+      if(parts.length>160) parts.splice(0, parts.length-160);
+      if(!raf) loop();
+    }
+    function loop(){
+      cx.clearRect(0,0,cv.width,cv.height);
+      const nowT=performance.now();
+      parts=parts.filter(p=>{
+        if(p.type==='b'){ p.y+=p.vy; p.x+=Math.sin(nowT/500+p.sway)*0.7; return p.y>-70 && nowT-p.born<9000; }
+        p.vy+=0.22; p.vx*=0.99; p.x+=p.vx; p.y+=p.vy; p.rot+=p.vr;
+        return p.y<cv.height+30 && nowT-p.born<7000;
+      });
+      if(!parts.length){ raf=null; return; }
+      for(const p of parts){
+        cx.save();
+        if(p.type==='b'){
+          cx.translate(p.x,p.y); cx.fillStyle=p.c;
+          cx.beginPath(); cx.ellipse(0,0,p.r*0.82,p.r,0,0,7); cx.fill();
+          cx.beginPath(); cx.moveTo(0,p.r); cx.quadraticCurveTo(4,p.r+14,-2,p.r+26);
+          cx.strokeStyle='rgba(255,255,255,.6)'; cx.lineWidth=1.4; cx.stroke();
+          cx.fillStyle='rgba(255,255,255,.35)';
+          cx.beginPath(); cx.ellipse(-p.r*0.3,-p.r*0.35,p.r*0.2,p.r*0.28,0,0,7); cx.fill();
+        } else {
+          cx.translate(p.x,p.y); cx.rotate(p.rot);
+          cx.scale(1, Math.abs(Math.sin(nowT/180+p.rot))*0.8+0.2);
+          cx.fillStyle=p.c; cx.fillRect(-p.w/2,-p.h/2,p.w,p.h);
+        }
+        cx.restore();
+      }
+      raf=requestAnimationFrame(loop);
+    }
+
+    renderStage();
+  </script>
+</body>
+</html>

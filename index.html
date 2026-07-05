@@ -31,7 +31,7 @@
 </head>
 <body>
   <div id="dot"></div>
-  <div id="ver">forest v26</div>
+  <div id="ver">forest v27</div>
   <div id="start"><div class="ring">🌲</div></div>
 
   <script type="importmap">
@@ -57,6 +57,11 @@
     const GLADE10 = new THREE.Vector3(7, 0, -58);   // ARC 2: juggling fox (jkl;)
     const GLADE11 = new THREE.Vector3(-15, 0, -66); // ARC 2: stretchy giraffes (g h)
     const GLADE12 = new THREE.Vector3(15, 0, -66);  // ARC 2: tightrope (mirror pairs)
+    const GLADE13 = new THREE.Vector3(-8, 0, -82);  // ARC 3: bubble fashion show
+    const GLADE14 = new THREE.Vector3(8, 0, -82);   // ARC 3: squishy factory
+    const GLADE15 = new THREE.Vector3(-16, 0, -90); // ARC 3: dance party
+    const GLADE16 = new THREE.Vector3(16, 0, -90);  // ARC 3: firefly jars
+    const GLADE17 = new THREE.Vector3(0, 0, -96);   // ARC 3: piano paws (the tune station)
 
     const renderer = new THREE.WebGLRenderer({ antialias: true });
     renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
@@ -76,8 +81,10 @@
     const QS = new URLSearchParams(location.search);
     const FROM = QS.get('from');
     // parent controls (not linked anywhere): ?grant opens the star gate, ?reset wipes all progress
-    const ALLKEYS = ['jk','df','earrings','snail','ants','wink','butterfly','braid','juggle','giraffe','tightrope'];
+    const ALLKEYS = ['jk','df','earrings','snail','ants','wink','butterfly','braid','juggle','giraffe','tightrope',
+                     'fashion','factory','dance','fireflies','piano'];
     if (QS.has('grant')) ALLKEYS.slice(0, 7).forEach(k => localStorage.setItem('ada.rounds.' + k, '3'));
+    if (QS.has('grant2')) ALLKEYS.slice(0, 11).forEach(k => localStorage.setItem('ada.rounds.' + k, '3'));
     if (QS.has('reset')) ALLKEYS.forEach(k => localStorage.removeItem('ada.rounds.' + k));
     if (FROM === 'deep') {
       camera.position.set(0, 1.6, -21);
@@ -86,6 +93,10 @@
     if (FROM === 'deep2') {                        // back from an Arc-2 station: past the star gate
       camera.position.set(0, 1.6, -52.5);
       camera.lookAt(0, 1.6, -62);
+    }
+    if (FROM === 'deep3') {                        // back from an Arc-3 station: past the second gate
+      camera.position.set(0, 1.6, -76.5);
+      camera.lookAt(0, 1.6, -86);
     }
     scene.add(camera);
 
@@ -99,8 +110,8 @@
     );
     ground.rotation.x = -Math.PI / 2;   // lay it FLAT (mustn't chain off scene.add — that returns the scene)
     scene.add(ground);
-    const path = new THREE.Mesh(new THREE.PlaneGeometry(5, 80), new THREE.MeshStandardMaterial({ color: 0x6fcf97 }));
-    path.rotation.x = -Math.PI / 2; path.position.set(0, 0.01, -20); scene.add(path);
+    const path = new THREE.Mesh(new THREE.PlaneGeometry(5, 130), new THREE.MeshStandardMaterial({ color: 0x6fcf97 }));
+    path.rotation.x = -Math.PI / 2; path.position.set(0, 0.01, -45); scene.add(path);
 
     // trees — three varied species, scattered & kept off the central corridor
     const TRUNK = 0x7a5230, BIRCH = 0xe8e8e0;
@@ -155,6 +166,11 @@
       if (Math.hypot(x - GLADE10.x, z - GLADE10.z) < 7) continue;
       if (Math.hypot(x - GLADE11.x, z - GLADE11.z) < 7) continue;
       if (Math.hypot(x - GLADE12.x, z - GLADE12.z) < 7) continue;
+      if (Math.hypot(x - GLADE13.x, z - GLADE13.z) < 7) continue;
+      if (Math.hypot(x - GLADE14.x, z - GLADE14.z) < 7) continue;
+      if (Math.hypot(x - GLADE15.x, z - GLADE15.z) < 7) continue;
+      if (Math.hypot(x - GLADE16.x, z - GLADE16.z) < 7) continue;
+      if (Math.hypot(x - GLADE17.x, z - GLADE17.z) < 7) continue;
       tree(x, z);
     }
 
@@ -173,6 +189,11 @@
       if (Math.hypot(x - GLADE10.x, z - GLADE10.z) < pad) return false;
       if (Math.hypot(x - GLADE11.x, z - GLADE11.z) < pad) return false;
       if (Math.hypot(x - GLADE12.x, z - GLADE12.z) < pad) return false;
+      if (Math.hypot(x - GLADE13.x, z - GLADE13.z) < pad) return false;
+      if (Math.hypot(x - GLADE14.x, z - GLADE14.z) < pad) return false;
+      if (Math.hypot(x - GLADE15.x, z - GLADE15.z) < pad) return false;
+      if (Math.hypot(x - GLADE16.x, z - GLADE16.z) < pad) return false;
+      if (Math.hypot(x - GLADE17.x, z - GLADE17.z) < pad) return false;
       return true;
     }
     function mushroom(x, z, s) {
@@ -410,7 +431,8 @@
     const gradStars = [];
     [['jk', GLADE2], ['df', GLADE3], ['earrings', GLADE4], ['snail', GLADE5],
      ['ants', GLADE6], ['wink', GLADE7], ['butterfly', GLADE8],
-     ['braid', GLADE9], ['juggle', GLADE10], ['giraffe', GLADE11], ['tightrope', GLADE12]].forEach(([k, pos]) => {
+     ['braid', GLADE9], ['juggle', GLADE10], ['giraffe', GLADE11], ['tightrope', GLADE12],
+     ['fashion', GLADE13], ['factory', GLADE14], ['dance', GLADE15], ['fireflies', GLADE16], ['piano', GLADE17]].forEach(([k, pos]) => {
       if (+(localStorage.getItem('ada.rounds.' + k) || 0) < 3) return;
       const s = starMesh(); s.position.set(pos.x, 7.4, pos.z); scene.add(s); gradStars.push(s);
     });
@@ -566,6 +588,116 @@
         new THREE.MeshStandardMaterial({ color: 0xf5f0e6, roughness: .6 }));
       rope.rotation.z = Math.PI / 2; rope.position.y = -0.98; tightG.add(rope);
       tightG.position.set(GLADE12.x, 3, GLADE12.z + 0.2); scene.add(tightG);
+    }
+
+    // ---- GATE 2: four sockets, one per Arc-2 station — all gold opens Arc 3 ----
+    const ARC2K = ['braid', 'juggle', 'giraffe', 'tightrope'];
+    const arcOpen2 = ARC2K.every(earned);
+    const arch2Mat = new THREE.MeshStandardMaterial({ color: arcOpen2 ? 0xffd23f : 0x557d74,
+      roughness: .5, metalness: arcOpen2 ? .5 : 0 });
+    const arch2 = new THREE.Mesh(new THREE.TorusGeometry(5, 0.55, 14, 40, Math.PI), arch2Mat);
+    arch2.position.set(0, 7, -74); scene.add(arch2);
+    for (const s of [-5, 5]) {
+      const pillar = new THREE.Mesh(new THREE.CylinderGeometry(0.55, 0.65, 7, 10), arch2Mat);
+      pillar.position.set(s, 3.5, -74); scene.add(pillar);
+    }
+    ARC2K.forEach((k, i) => {
+      const a = Math.PI * (i + 0.5) / ARC2K.length;
+      const st = starMesh(); st.scale.setScalar(0.5);
+      if (!earned(k)) st.material.color.set(0x40625a);
+      st.position.set(-Math.cos(a) * 5, 7 + Math.sin(a) * 5, -74.01);
+      scene.add(st);
+    });
+
+    // ---- Arc-3 portals: grey and sealed until gate 2 opens ----
+    for (const [pos, col] of [
+      [GLADE13, 0xf472b6], [GLADE14, 0x34d399], [GLADE15, 0x60a5fa], [GLADE16, 0xfbbf24], [GLADE17, 0xf5f0e6],
+    ]) {
+      const p = new THREE.Mesh(new THREE.TorusGeometry(3.2, 0.5, 16, 48),
+        new THREE.MeshBasicMaterial({ color: arcOpen2 ? col : 0x527a70 }));
+      p.position.set(pos.x, 3, pos.z); scene.add(p);
+    }
+    let bubbleG = null, sqG = null, discoG = null, jarG = null, catG = null;
+    if (arcOpen2) {
+      // fashion: a soap bubble with a sunhat floating inside
+      bubbleG = new THREE.Group();
+      const shell = new THREE.Mesh(new THREE.SphereGeometry(1.25, 20, 16),
+        new THREE.MeshStandardMaterial({ color: 0xdbeafe, transparent: true, opacity: .28, roughness: .2 }));
+      bubbleG.add(shell);
+      const hatM = new THREE.MeshStandardMaterial({ color: 0xff6b9d, roughness: .7 });
+      const crown = new THREE.Mesh(new THREE.CylinderGeometry(0.4, 0.45, 0.4, 14), hatM);
+      crown.position.y = 0.1; bubbleG.add(crown);
+      const brim = new THREE.Mesh(new THREE.CylinderGeometry(0.85, 0.85, 0.07, 18), hatM);
+      brim.position.y = -0.1; bubbleG.add(brim);
+      bubbleG.position.set(GLADE13.x, 3, GLADE13.z + 0.2); scene.add(bubbleG);
+      // factory: a pastel squishy cube with a face, breathing
+      sqG = new THREE.Group();
+      const cube = new THREE.Mesh(new THREE.BoxGeometry(1.5, 1.5, 1.5),
+        new THREE.MeshStandardMaterial({ color: 0x8ee7c9, roughness: .6 }));
+      sqG.add(cube);
+      eyes(sqG, 0.34, 0.2, 0.78, 0.1);
+      const sm = new THREE.Mesh(new THREE.TorusGeometry(0.26, 0.05, 8, 16, Math.PI), eyeDk);
+      sm.position.set(0, -0.18, 0.78); sm.rotation.z = Math.PI; sqG.add(sm);
+      sqG.position.set(GLADE14.x, 3, GLADE14.z + 0.2); scene.add(sqG);
+      // dance: a mirror ball with orbiting party lights
+      discoG = new THREE.Group();
+      const ballM = new THREE.Mesh(new THREE.SphereGeometry(0.85, 22, 18),
+        new THREE.MeshStandardMaterial({ color: 0xe5e7eb, metalness: .95, roughness: .12 }));
+      discoG.add(ballM);
+      const lights = new THREE.Group();
+      [0xff6b9d, 0xffd23f, 0x2dd4bf, 0xa78bfa].forEach((c, i) => {
+        const l = new THREE.Mesh(new THREE.SphereGeometry(0.16, 10, 8),
+          new THREE.MeshStandardMaterial({ color: c, emissive: c, emissiveIntensity: .7 }));
+        const a = i / 4 * Math.PI * 2; l.position.set(Math.cos(a) * 1.4, Math.sin(a) * 0.5, Math.sin(a) * 1.4);
+        lights.add(l);
+      });
+      discoG.add(lights); discoG.userData.lights = lights;
+      discoG.position.set(GLADE15.x, 3, GLADE15.z + 0.2); scene.add(discoG);
+      // fireflies: a glass jar with glowing flies inside
+      jarG = new THREE.Group();
+      const glass = new THREE.Mesh(new THREE.CylinderGeometry(0.75, 0.7, 1.6, 14),
+        new THREE.MeshStandardMaterial({ color: 0xcfe8ff, transparent: true, opacity: .25, roughness: .15 }));
+      jarG.add(glass);
+      const lid = new THREE.Mesh(new THREE.CylinderGeometry(0.8, 0.8, 0.16, 14),
+        new THREE.MeshStandardMaterial({ color: 0x7a5230, roughness: .8 }));
+      lid.position.y = 0.88; jarG.add(lid);
+      jarG.userData.flies = [];
+      [[-0.25, -0.2, 0.1], [0.28, 0.15, -0.1], [0, -0.45, -0.15]].forEach(([fx, fy, fz], i) => {
+        const fl = new THREE.Mesh(new THREE.SphereGeometry(0.09, 8, 6),
+          new THREE.MeshStandardMaterial({ color: 0xfde047, emissive: 0xfde047, emissiveIntensity: 1 }));
+        fl.position.set(fx, fy, fz); fl.userData.phase = i * 2.1; jarG.add(fl); jarG.userData.flies.push(fl);
+      });
+      jarG.position.set(GLADE16.x, 3, GLADE16.z + 0.2); scene.add(jarG);
+      // piano: a grey kitten with whiskers and floating notes
+      catG = new THREE.Group();
+      const catM = new THREE.MeshStandardMaterial({ color: 0x9aa0a6, roughness: .85 });
+      const chead = new THREE.Mesh(new THREE.SphereGeometry(0.7, 18, 14), catM);
+      chead.scale.set(1.05, 0.92, 0.9); catG.add(chead);
+      for (const s of [-1, 1]) {
+        const ear = new THREE.Mesh(new THREE.ConeGeometry(0.22, 0.42, 8), catM);
+        ear.position.set(s * 0.42, 0.66, -0.02); ear.rotation.z = -s * 0.2; catG.add(ear);
+        const inner = new THREE.Mesh(new THREE.ConeGeometry(0.11, 0.22, 8),
+          new THREE.MeshStandardMaterial({ color: 0xffb9d0 }));
+        inner.position.set(s * 0.42, 0.62, 0.08); inner.rotation.z = -s * 0.2; catG.add(inner);
+        for (let w = 0; w < 2; w++) {
+          const wh = new THREE.Mesh(new THREE.CylinderGeometry(0.012, 0.012, 0.55, 4),
+            new THREE.MeshStandardMaterial({ color: 0xffffff }));
+          wh.rotation.z = Math.PI / 2 + s * (0.12 + w * 0.18);
+          wh.position.set(s * 0.55, -0.12 - w * 0.1, 0.5); catG.add(wh);
+        }
+      }
+      const nose = new THREE.Mesh(new THREE.SphereGeometry(0.08, 8, 6),
+        new THREE.MeshStandardMaterial({ color: 0xffb9d0 }));
+      nose.position.set(0, -0.1, 0.62); catG.add(nose);
+      eyes(catG, 0.28, 0.14, 0.56, 0.08);
+      const noteM = new THREE.MeshStandardMaterial({ color: 0x2a1133 });
+      [[-1.15, 0.5], [1.2, 0.2]].forEach(([nx, ny]) => {
+        const head8 = new THREE.Mesh(new THREE.SphereGeometry(0.14, 10, 8), noteM);
+        head8.scale.set(1.2, 0.8, 0.8); head8.position.set(nx, ny, 0); catG.add(head8);
+        const stem = new THREE.Mesh(new THREE.CylinderGeometry(0.025, 0.025, 0.55, 4), noteM);
+        stem.position.set(nx + 0.15, ny + 0.28, 0); catG.add(stem);
+      });
+      catG.position.set(GLADE17.x, 3, GLADE17.z + 0.2); scene.add(catG);
     }
 
     // ---- a cute low-poly 3D axolotl, built from primitives (faces +Z) ----
@@ -822,6 +954,18 @@
           const d12 = Math.hypot(camera.position.x - GLADE12.x, camera.position.z - GLADE12.z);
           if (!entered && d12 < 3.2) { entered = true; location.href = 'tightrope.html'; }
         }
+        if (arcOpen2) {
+          const d13 = Math.hypot(camera.position.x - GLADE13.x, camera.position.z - GLADE13.z);
+          if (!entered && d13 < 3.2) { entered = true; location.href = 'fashion.html'; }
+          const d14 = Math.hypot(camera.position.x - GLADE14.x, camera.position.z - GLADE14.z);
+          if (!entered && d14 < 3.2) { entered = true; location.href = 'factory.html'; }
+          const d15 = Math.hypot(camera.position.x - GLADE15.x, camera.position.z - GLADE15.z);
+          if (!entered && d15 < 3.2) { entered = true; location.href = 'dance.html'; }
+          const d16 = Math.hypot(camera.position.x - GLADE16.x, camera.position.z - GLADE16.z);
+          if (!entered && d16 < 3.2) { entered = true; location.href = 'fireflies.html'; }
+          const d17 = Math.hypot(camera.position.x - GLADE17.x, camera.position.z - GLADE17.z);
+          if (!entered && d17 < 3.2) { entered = true; location.href = 'piano.html'; }
+        }
       }
       gem.rotation.y += dt * 1.2;                                         // the gem twirls like a dangly earring
       gem.position.y = 3 + Math.sin(clock.elapsedTime * 1.7 + 3) * 0.25;
@@ -850,6 +994,18 @@
         girG.position.y = 3.1 + Math.sin(clock.elapsedTime * 1.4 + 3) * 0.18; }
       if (tightG) { tightG.rotation.y = Math.atan2(camera.position.x - GLADE12.x, camera.position.z - GLADE12.z);
         tightG.position.y = 3 + Math.sin(clock.elapsedTime * 1.6 + 4) * 0.2; }
+      if (bubbleG) { bubbleG.rotation.y += dt * 0.5; bubbleG.position.y = 3 + Math.sin(clock.elapsedTime * 1.3 + 1) * 0.25; }
+      if (sqG) { sqG.scale.y = 1 + Math.sin(clock.elapsedTime * 2.4) * 0.07;   // it breathes
+        sqG.rotation.y = Math.atan2(camera.position.x - GLADE14.x, camera.position.z - GLADE14.z);
+        sqG.position.y = 3 + Math.sin(clock.elapsedTime * 1.5 + 2) * 0.18; }
+      if (discoG) { discoG.userData.lights.rotation.y += dt * 2.2; discoG.rotation.y += dt * 0.6;
+        discoG.position.y = 3 + Math.sin(clock.elapsedTime * 1.6 + 3) * 0.2; }
+      if (jarG) { jarG.position.y = 3 + Math.sin(clock.elapsedTime * 1.4 + 4) * 0.18;
+        for (const fl of jarG.userData.flies)
+          fl.position.y = fl.userData.baseY === undefined ? (fl.userData.baseY = fl.position.y)
+            : fl.userData.baseY + Math.sin(clock.elapsedTime * 2 + fl.userData.phase) * 0.18; }
+      if (catG) { catG.rotation.y = Math.atan2(camera.position.x - GLADE17.x, camera.position.z - GLADE17.z);
+        catG.position.y = 3 + Math.sin(clock.elapsedTime * 1.5 + 5) * 0.2; }
       bfly.rotation.y = Math.atan2(camera.position.x - GLADE8.x, camera.position.z - GLADE8.z);
       bfly.position.y = 3 + Math.sin(clock.elapsedTime * 2.4 + 4) * 0.3;
       axo.rotation.y = Math.atan2(camera.position.x - GLADE.x, camera.position.z - GLADE.z);  // face the player

@@ -3,8 +3,11 @@
 ## Todo
 - [x] seal bark for each star *(done 5 Jul — seal.mp3 per star, seal_cheer.mp3 on graduation)*
 - [x] mark completed stations *(done 5 Jul — progress persists in localStorage; gold star crowns graduated portals in the forest)*
-- [ ] new rewards for completing a rows - new and better squishes
-- [ ] 
+- [x] changes for the next arc *(done 5 Jul)*
+  - [x] Can't access the new arc without stars — STAR GATE arch across the path at z=-50; 7 sockets fill as stations graduate; all 7 = arch turns gold and Arc 2 opens
+  - [x] new squishies — Arc 2 celebrates with spinning STARS & HEARTS, bouncier physics
+  - [x] new tones — Arc 2 uses a warm marimba on a pentatonic scale (different per station)
+- [x] Arc 2 built past the gate *(done 5 Jul — braid, juggle, giraffe, tightrope at z -58..-66)*
 
 ## Stations
 
@@ -24,15 +27,15 @@ the forest button glows).
 | 5 | **🐜 Ant Parade** (`ants.html`) | March ants in tiny hats | a (left pinky) | 4 → 6 → 8 ants |
 | 6 | **😉 The Wink** (`wink.html`) | Wink at the animal friends | ; (right pinky) | 4 → 6 → 8 winks |
 | 7 | **🦋 Butterfly Wings** (`butterfly.html`) | Fly up to the hedgehog's flower | a ↔ ; (both pinkies) | `a;a;a;a;` → `aa;;aa;;aa;;` → random 16 |
+| 8 | **💇 Hair Braider** (`braid.html`) | Weave the unicorn's braid, bow on | a s d f (left-hand rolls) | `asdf` → `fdsa` → `asdffdsa` → random 8 |
+| 9 | **🦊 Juggling Fox** (`juggle.html`) | Toss the circus fox's four balls | j k l ; (right-hand rolls) | `jkl;` → `;lkj` → `jkl;;lkj` → random 8 |
+| 10 | **🦒 Stretchy Giraffes** (`giraffe.html`) | Index reaches stretch necks to meet | g & h | `ghghgh` → `gghhgghh` → random 10 |
+| 11 | **🤸 Tightrope** (`tightrope.html`) | Tutu elephant crosses the wire | f↔j, d↔k, s↔l, a↔; | 8 steps per pair, all four pairs |
 
 ### Planned (design in STATIONS.md)
 
 | # | Station | Theme | Keys |
 |---|---------|-------|------|
-| 8 | 💇 Hair Braider | Weave the pony's braid | a s d f rolls |
-| 9 | 🦊 Juggling Fox | Keep four balls in the air | j k l ; rolls |
-| 10 | 🦒 Stretchy Giraffes | Necks reach to the middle | g & h (index reaches) |
-| 11 | 🤸 Tightrope | Tutu elephant, step by step | f↔j d↔k s↔l a↔; |
 | 12 | 🎹 Piano Paws | Home row is a piano — play real tunes | all 8 as notes |
 | 13 | 🪩 Dance Party | Build the possum's disco routine | mirror pairs = moves |
 | 14 | 🫧 Bubble Fashion Show | Pop bubbles, dress the capybara | random singles |

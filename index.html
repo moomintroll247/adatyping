@@ -31,7 +31,7 @@
 </head>
 <body>
   <div id="dot"></div>
-  <div id="ver">forest v24</div>
+  <div id="ver">forest v25</div>
   <div id="start"><div class="ring">🌲</div></div>
 
   <script type="importmap">
@@ -53,6 +53,10 @@
     const GLADE6 = new THREE.Vector3(14, 0, -36);  // glade 6 (ant parade, a)
     const GLADE7 = new THREE.Vector3(-14, 0, -36); // glade 7 (the wink, ;)
     const GLADE8 = new THREE.Vector3(0, 0, -44);   // glade 8 (butterfly wings, a & ;)
+    const GLADE9  = new THREE.Vector3(-7, 0, -58);  // ARC 2: hair braider (asdf)
+    const GLADE10 = new THREE.Vector3(7, 0, -58);   // ARC 2: juggling fox (jkl;)
+    const GLADE11 = new THREE.Vector3(-15, 0, -66); // ARC 2: stretchy giraffes (g h)
+    const GLADE12 = new THREE.Vector3(15, 0, -66);  // ARC 2: tightrope (mirror pairs)
 
     const renderer = new THREE.WebGLRenderer({ antialias: true });
     renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
@@ -73,6 +77,10 @@
     if (FROM === 'deep') {
       camera.position.set(0, 1.6, -21);
       camera.lookAt(0, 1.6, -32);
+    }
+    if (FROM === 'deep2') {                        // back from an Arc-2 station: past the star gate
+      camera.position.set(0, 1.6, -52.5);
+      camera.lookAt(0, 1.6, -62);
     }
     scene.add(camera);
 
@@ -138,6 +146,10 @@
       if (Math.hypot(x - GLADE6.x, z - GLADE6.z) < 7) continue;
       if (Math.hypot(x - GLADE7.x, z - GLADE7.z) < 7) continue;
       if (Math.hypot(x - GLADE8.x, z - GLADE8.z) < 7) continue;
+      if (Math.hypot(x - GLADE9.x, z - GLADE9.z) < 7) continue;
+      if (Math.hypot(x - GLADE10.x, z - GLADE10.z) < 7) continue;
+      if (Math.hypot(x - GLADE11.x, z - GLADE11.z) < 7) continue;
+      if (Math.hypot(x - GLADE12.x, z - GLADE12.z) < 7) continue;
       tree(x, z);
     }
 
@@ -152,6 +164,10 @@
       if (Math.hypot(x - GLADE6.x, z - GLADE6.z) < pad) return false;
       if (Math.hypot(x - GLADE7.x, z - GLADE7.z) < pad) return false;
       if (Math.hypot(x - GLADE8.x, z - GLADE8.z) < pad) return false;
+      if (Math.hypot(x - GLADE9.x, z - GLADE9.z) < pad) return false;
+      if (Math.hypot(x - GLADE10.x, z - GLADE10.z) < pad) return false;
+      if (Math.hypot(x - GLADE11.x, z - GLADE11.z) < pad) return false;
+      if (Math.hypot(x - GLADE12.x, z - GLADE12.z) < pad) return false;
       return true;
     }
     function mushroom(x, z, s) {
@@ -388,10 +404,80 @@
     }
     const gradStars = [];
     [['jk', GLADE2], ['df', GLADE3], ['earrings', GLADE4], ['snail', GLADE5],
-     ['ants', GLADE6], ['wink', GLADE7], ['butterfly', GLADE8]].forEach(([k, pos]) => {
+     ['ants', GLADE6], ['wink', GLADE7], ['butterfly', GLADE8],
+     ['braid', GLADE9], ['juggle', GLADE10], ['giraffe', GLADE11], ['tightrope', GLADE12]].forEach(([k, pos]) => {
       if (+(localStorage.getItem('ada.rounds.' + k) || 0) < 3) return;
       const s = starMesh(); s.position.set(pos.x, 7.4, pos.z); scene.add(s); gradStars.push(s);
     });
+
+    // ---- the Arc-2 STAR GATE: an arch across the path with seven star sockets.
+    //      All seven Arc-1 stations graduated -> the arch turns gold and Arc 2 opens.
+    const ARC1 = ['jk', 'df', 'earrings', 'snail', 'ants', 'wink', 'butterfly'];
+    const earned = k => +(localStorage.getItem('ada.rounds.' + k) || 0) >= 3;
+    const arcOpen = ARC1.every(earned);
+    const archMat = new THREE.MeshStandardMaterial({ color: arcOpen ? 0xffd23f : 0x557d74,
+      roughness: .5, metalness: arcOpen ? .5 : 0 });
+    const arch = new THREE.Mesh(new THREE.TorusGeometry(5, 0.55, 14, 40, Math.PI), archMat);
+    arch.position.set(0, 7, -50); scene.add(arch);
+    for (const s of [-5, 5]) {
+      const pillar = new THREE.Mesh(new THREE.CylinderGeometry(0.55, 0.65, 7, 10), archMat);
+      pillar.position.set(s, 3.5, -50); scene.add(pillar);
+    }
+    ARC1.forEach((k, i) => {                       // one socket per station, riding the arch
+      const a = Math.PI * (i + 0.5) / ARC1.length;
+      const st = starMesh(); st.scale.setScalar(0.45);
+      if (!earned(k)) st.material.color.set(0x40625a);
+      st.position.set(-Math.cos(a) * 5, 7 + Math.sin(a) * 5, -50.01);
+      scene.add(st);
+    });
+
+    // ---- Arc-2 portals beyond the gate: grey and sealed until it opens ----
+    const arc2 = [
+      [GLADE9,  0xe879f9, 'braid.html'],
+      [GLADE10, 0xfb7185, 'juggle.html'],
+      [GLADE11, 0xf59e0b, 'giraffe.html'],
+      [GLADE12, 0xc084fc, 'tightrope.html'],
+    ];
+    for (const [pos, col] of arc2) {
+      const p = new THREE.Mesh(new THREE.TorusGeometry(3.2, 0.5, 16, 48),
+        new THREE.MeshBasicMaterial({ color: arcOpen ? col : 0x527a70 }));
+      p.position.set(pos.x, 3, pos.z); scene.add(p);
+    }
+    let bowG = null, juggleG = null, girG = null, tightG = null;
+    if (arcOpen) {                                 // greeters only appear once the gate opens
+      bowG = new THREE.Group();                    // hair-braider bow
+      const bowMat = new THREE.MeshStandardMaterial({ color: 0xff6b9d, roughness: .6 });
+      const c1 = new THREE.Mesh(new THREE.ConeGeometry(0.7, 1.6, 10), bowMat);
+      c1.rotation.z = Math.PI / 2; c1.position.x = -0.85; bowG.add(c1);
+      const c2 = new THREE.Mesh(new THREE.ConeGeometry(0.7, 1.6, 10), bowMat);
+      c2.rotation.z = -Math.PI / 2; c2.position.x = 0.85; bowG.add(c2);
+      bowG.add(new THREE.Mesh(new THREE.SphereGeometry(0.4, 12, 10), new THREE.MeshStandardMaterial({ color: 0xff9ec4 })));
+      bowG.position.set(GLADE9.x, 3, GLADE9.z + 0.2); scene.add(bowG);
+      juggleG = new THREE.Group();                 // fox's juggling balls, orbiting
+      [0xffd23f, 0x2dd4bf, 0xa78bfa, 0xff6b9d].forEach((c, i) => {
+        const b = new THREE.Mesh(new THREE.SphereGeometry(0.45, 12, 10), new THREE.MeshStandardMaterial({ color: c, roughness: .5 }));
+        const a = i / 4 * Math.PI * 2; b.position.set(Math.cos(a) * 1.3, Math.sin(a) * 1.3, 0); juggleG.add(b);
+      });
+      juggleG.position.set(GLADE10.x, 3, GLADE10.z + 0.2); scene.add(juggleG);
+      girG = new THREE.Group();                    // mini giraffe, neck stretched
+      const girMat = new THREE.MeshStandardMaterial({ color: 0xeab308, roughness: .8 });
+      const neck = new THREE.Mesh(new THREE.CylinderGeometry(0.22, 0.28, 2.4, 10), girMat);
+      neck.rotation.z = 0.35; neck.position.set(-0.35, 0, 0); girG.add(neck);
+      const ghead = new THREE.Mesh(new THREE.SphereGeometry(0.42, 14, 10), girMat);
+      ghead.position.set(-0.85, 1.25, 0); ghead.scale.set(1.25, 0.9, 0.9); girG.add(ghead);
+      const dkm = new THREE.MeshStandardMaterial({ color: 0x7a5230 });
+      for (const s of [-0.16, 0.16]) { const h = new THREE.Mesh(new THREE.CylinderGeometry(0.05, 0.05, 0.4, 6), dkm);
+        h.position.set(-0.8 + s, 1.65, s); girG.add(h); }
+      girG.position.set(GLADE11.x, 2.6, GLADE11.z + 0.2); scene.add(girG);
+      tightG = new THREE.Group();                  // elephant balancing in a tutu
+      const tutu = new THREE.Mesh(new THREE.ConeGeometry(1.0, 0.7, 16), new THREE.MeshStandardMaterial({ color: 0xff9ec4, roughness: .7 }));
+      tutu.rotation.x = Math.PI; tightG.add(tutu);
+      const ball = new THREE.Mesh(new THREE.SphereGeometry(0.65, 14, 12), new THREE.MeshStandardMaterial({ color: 0x9aa0a6, roughness: .8 }));
+      ball.position.y = 0.75; tightG.add(ball);
+      const trunk = new THREE.Mesh(new THREE.CylinderGeometry(0.09, 0.12, 0.7, 8), new THREE.MeshStandardMaterial({ color: 0x9aa0a6 }));
+      trunk.position.set(0, 0.55, 0.75); trunk.rotation.x = 0.8; tightG.add(trunk);
+      tightG.position.set(GLADE12.x, 3, GLADE12.z + 0.2); scene.add(tightG);
+    }
 
     // ---- a cute low-poly 3D axolotl, built from primitives (faces +Z) ----
     function makeAxolotl() {
@@ -637,6 +723,16 @@
         if (!entered && d7 < 3.2) { entered = true; location.href = 'wink.html'; }
         const d8 = Math.hypot(camera.position.x - GLADE8.x, camera.position.z - GLADE8.z);
         if (!entered && d8 < 3.2) { entered = true; location.href = 'butterfly.html'; }
+        if (arcOpen) {                             // Arc-2 portals only work once the gate is gold
+          const d9 = Math.hypot(camera.position.x - GLADE9.x, camera.position.z - GLADE9.z);
+          if (!entered && d9 < 3.2) { entered = true; location.href = 'braid.html'; }
+          const d10 = Math.hypot(camera.position.x - GLADE10.x, camera.position.z - GLADE10.z);
+          if (!entered && d10 < 3.2) { entered = true; location.href = 'juggle.html'; }
+          const d11 = Math.hypot(camera.position.x - GLADE11.x, camera.position.z - GLADE11.z);
+          if (!entered && d11 < 3.2) { entered = true; location.href = 'giraffe.html'; }
+          const d12 = Math.hypot(camera.position.x - GLADE12.x, camera.position.z - GLADE12.z);
+          if (!entered && d12 < 3.2) { entered = true; location.href = 'tightrope.html'; }
+        }
       }
       gem.rotation.y += dt * 1.2;                                         // the gem twirls like a dangly earring
       gem.position.y = 3 + Math.sin(clock.elapsedTime * 1.7 + 3) * 0.25;
@@ -656,6 +752,11 @@
         gradStars[i].rotation.y += dt * 1.5;
         gradStars[i].position.y = 7.4 + Math.sin(clock.elapsedTime * 1.6 + i) * 0.18;
       }
+      if (bowG) { bowG.rotation.y += dt * 1.1; bowG.position.y = 3 + Math.sin(clock.elapsedTime * 1.5 + 1) * 0.2; }
+      if (juggleG) { juggleG.rotation.z += dt * 1.8; juggleG.position.y = 3 + Math.sin(clock.elapsedTime * 1.7 + 2) * 0.2; }
+      if (girG) { girG.rotation.y = Math.atan2(camera.position.x - GLADE11.x, camera.position.z - GLADE11.z);
+        girG.position.y = 2.6 + Math.sin(clock.elapsedTime * 1.4 + 3) * 0.18; }
+      if (tightG) { tightG.rotation.y += dt * 0.9; tightG.position.y = 3 + Math.sin(clock.elapsedTime * 1.6 + 4) * 0.2; }
       bfly.rotation.y = Math.atan2(camera.position.x - GLADE8.x, camera.position.z - GLADE8.z);
       bfly.position.y = 3 + Math.sin(clock.elapsedTime * 2.4 + 4) * 0.3;
       axo.rotation.y = Math.atan2(camera.position.x - GLADE.x, camera.position.z - GLADE.z);  // face the player
